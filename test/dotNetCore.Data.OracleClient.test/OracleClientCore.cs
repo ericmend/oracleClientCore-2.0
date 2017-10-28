@@ -100,7 +100,7 @@ namespace dotNetCore.Data.OracleClient.test
 		    return true;
 		}
 
-		private static OracleLob GetOracleLob(OracleTransaction transaction, byte[] blob)
+		private OracleLob GetOracleLob(OracleTransaction transaction, byte[] blob)
 		{
 		    string BLOB_CREATE = "DECLARE dpBlob BLOB; "	
 		    + "BEGIN "
@@ -143,8 +143,7 @@ namespace dotNetCore.Data.OracleClient.test
 
 		    return tempLob;
 		}
-
-		static void SetupMyPackage(OracleConnection con) 
+		private void SetupMyPackage(OracleConnection con) 
 		{
 			try {
 				OracleCommand cmd2 = con.CreateCommand ();
@@ -155,8 +154,6 @@ namespace dotNetCore.Data.OracleClient.test
 				// ignore if table already exists
 			}
 
-			Console.WriteLine ("  CREATE TABLE ...");
-
 			OracleCommand create = con.CreateCommand ();
 			create.CommandText = "CREATE TABLE BLOBTEST2 (BLOB_COLUMN BLOB)";
 			create.ExecuteNonQuery ();
@@ -164,7 +161,6 @@ namespace dotNetCore.Data.OracleClient.test
 			create.CommandText = "commit";
 			create.ExecuteNonQuery();
 
-			Console.Error.WriteLine("    create or replace package MyPackage...");
 			OracleCommand cmd = con.CreateCommand();
 			cmd.CommandText = 
 				"CREATE OR REPLACE PACKAGE MyPackage AS\n" +
@@ -172,7 +168,6 @@ namespace dotNetCore.Data.OracleClient.test
 				"END MyPackage;";
 			cmd.ExecuteNonQuery();
 
-			Console.Error.WriteLine("    create or replace package body MyPackage...");			
 			cmd.CommandText = 
 				"CREATE OR REPLACE PACKAGE BODY MyPackage AS\n" +
 				"   Procedure InsertBlob (i_Sig_File blob)\n" +
@@ -187,307 +182,7 @@ namespace dotNetCore.Data.OracleClient.test
 			cmd.ExecuteNonQuery();
 		}
 
-		[Fact]
-		public void InsertBlobTest()
-        {
-			using (var con = new OracleConnection(connectionString))
-            {
-				con.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				con.StateChange += new StateChangeEventHandler (OnStateChange);
-				con.Open ();
-
-				SetupMyPackage(con);
-				
-				byte[] ByteArray = new byte[2000]; // test Blob data
-				byte j = 0;
-				for (int i = 0; i < ByteArray.Length; i++) {
-					ByteArray[i] = j;
-					if (j > 255)
-						j = 0;
-					j++;
-				}
-
-				string sproc = "MyPackage" + ".InsertBlob";
-
-				OracleCommand cmd = new OracleCommand();
-				cmd.CommandText = sproc;
-				cmd.CommandType = CommandType.StoredProcedure;
-				cmd.Connection = con;
-				cmd.Transaction = cmd.Connection.BeginTransaction();
-
-				try {
-					OracleParameter p1 = new OracleParameter("i_Sig_File", OracleType.Blob);
-					p1.Direction = ParameterDirection.Input;
-
-					OracleLob lob2 = GetOracleLob(cmd.Transaction, ByteArray);
-					p1.Value = lob2.Value;
-
-					cmd.Parameters.Add(p1);
-
-					cmd.ExecuteNonQuery();
-
-					cmd.Transaction.Commit();
-				
-					OracleCommand select = con.CreateCommand ();
-					select.CommandText = "SELECT BLOB_COLUMN FROM BLOBTEST2";
-
-					OracleDataReader reader = select.ExecuteReader();
-					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
-
-					if (reader.IsDBNull(0))
-						Assert.True(false, "Lob IsNull");
-					else {
-						OracleLob lob = reader.GetOracleLob (0);
-						if (lob == OracleLob.Null)
-							Assert.True(false, "Lob is OracleLob.Null");
-						else {
-							byte[] blob = (byte[]) lob.Value;
-							string result = GetHexString(blob);
-							Assert.True(ByteArrayCompare (ByteArray, blob), "ByteArray and blob are not the same: bad");
-						}
-					}
-				}
-				catch(Exception e) {
-					Assert.True(false, e.Message);
-				}
-			}
-        }
-
-        [Fact]
-        public void ConnectionInfo()
-        {
-			OracleConnection con1 = new OracleConnection();
-			try
-			{
-				Assert.True(string.IsNullOrEmpty(con1.DataSource));
-
-				con1.ConnectionString = connectionString;
-
-				con1.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				con1.StateChange += new StateChangeEventHandler (OnStateChange);
-
-				con1.Open ();
-
-				Assert.True(!string.IsNullOrEmpty(con1.ServerVersion));
-
-				Assert.True(con1.DataSource.Equals(dataSource));
-
-			} catch (System.Exception e) {
-				Assert.True(false, e.Message);
-			}
-			finally
-			{
-				if (con1 != null)
-				{
-					con1.Close ();
-				}
-				else
-				{
-					Assert.True(false, "Conexão nula.");
-				}
-            	con1 = null;
-			}
-        }
-
-
-
-/*
-		static void MonoTest(OracleConnection con)  
-		{
-			Console.WriteLine ("  Drop table MONO_ORACLE_TEST ...");
-			try {
-				OracleCommand cmd2 = con.CreateCommand ();
-				cmd2.CommandText = "DROP TABLE MONO_ORACLE_TEST";
-				cmd2.ExecuteNonQuery ();
-			}
-			catch (OracleException) {
-				// ignore if table already exists
-			}
-
-			OracleCommand cmd = null;
-
-			Console.WriteLine("  Creating table MONO_ORACLE_TEST...");
-			cmd = new OracleCommand();
-			cmd.Connection = con;
-			cmd.CommandText = "CREATE TABLE MONO_ORACLE_TEST ( " +
-				" varchar2_value VarChar2(32),  " +
-				" long_value long, " +
-				" number_whole_value Number(18), " +
-				" number_scaled_value Number(18,2), " +
- 				" number_integer_value Integer, " +
- 				" float_value Float, " +
- 				" date_value Date, " +
- 				" char_value Char(32), " +
- 				" clob_value Clob, " +
- 				" blob_value Blob, " +
-				" clob_empty_value Clob, " +
-				" blob_empty_value Blob, " +
-				" varchar2_null_value VarChar2(32),  " +
-				" number_whole_null_value Number(18), " +
-				" number_scaled_null_value Number(18,2), " +
-				" number_integer_null_value Integer, " +
-				" float_null_value Float, " +
-				" date_null_value Date, " +
-				" char_null_value Char(32), " +
-				" clob_null_value Clob, " +
-				" blob_null_value Blob " +
-				")";
-
-			cmd.ExecuteNonQuery();
-
-			Console.WriteLine("  Begin Trans for table MONO_ORACLE_TEST...");
-			OracleTransaction trans = con.BeginTransaction ();
-
-			Console.WriteLine("  Inserting value into MONO_ORACLE_TEST...");
-			cmd = new OracleCommand();
-			cmd.Connection = con;
-			cmd.Transaction = trans;
-			cmd.CommandText = "INSERT INTO mono_oracle_test " +
- 				" ( varchar2_value,  " +
-				"  long_value, " +
- 				"  number_whole_value, " +
-  				"  number_scaled_value, " +
-  				"  number_integer_value, " +
-  				"  float_value, " +
-  				"  date_value, " +
-  				"  char_value, " +
-  				"  clob_value, " +
-  				"  blob_value, " +
-				"  clob_empty_value, " +
-				"  blob_empty_value " +
-				") " +
- 				" VALUES( " +
-  				"  'Mono', " +
-				"  'This is a LONG column', " +
-  				"  123, " +
-  				"  456.78, " +
-  				"  8765, " +
-  				"  235.2, " +
-  				"  TO_DATE( '2004-12-31', 'YYYY-MM-DD' ), " +
-  				"  'US', " +
-  				"  EMPTY_CLOB(), " +
-  				"  EMPTY_BLOB()," +
-				"  EMPTY_CLOB(), " +
-				"  EMPTY_BLOB()" +
-				")";
-
-			cmd.ExecuteNonQuery();
-
-			Console.WriteLine("  Select/Update CLOB columns on table MONO_ORACLE_TEST...");
-
-			// update BLOB and CLOB columns
-			OracleCommand select = con.CreateCommand ();
-			select.Transaction = trans;
-			select.CommandText = "SELECT CLOB_VALUE, BLOB_VALUE FROM MONO_ORACLE_TEST FOR UPDATE";
-			OracleDataReader reader = select.ExecuteReader ();
-			if (!reader.Read ())
-				Console.WriteLine ("ERROR: RECORD NOT FOUND");
-			// update clob_value
-			Console.WriteLine("     Update CLOB column on table MONO_ORACLE_TEST...");
-			OracleLob clob = reader.GetOracleLob (0);
-			byte[] bytes = null;
-			UnicodeEncoding encoding = new UnicodeEncoding ();
-			bytes = encoding.GetBytes ("Mono is fun!");
-			clob.Write (bytes, 0, bytes.Length);
-			clob.Close ();
-			// update blob_value
-			Console.WriteLine("     Update BLOB column on table MONO_ORACLE_TEST...");
-			OracleLob blob = reader.GetOracleLob (1);
-			bytes = new byte[6] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x036 };
-			blob.Write (bytes, 0, bytes.Length);
-			blob.Close ();
-			
-			Console.WriteLine("  Commit trans for table MONO_ORACLE_TEST...");
-			trans.Commit ();
-
-			// OracleCommand.ExecuteReader of MONO_ORACLE_TEST table
-			Console.WriteLine("  Read simple test for table MONO_ORACLE_TEST...");
-			ReadSimpleTest(con, "SELECT * FROM MONO_ORACLE_TEST");
-
-			// OracleCommand.ExecuteScalar
-			Console.WriteLine(" -ExecuteScalar tests...");
-			string varchar2_value = (string) ReadScalar (con,"SELECT MAX(varchar2_value) FROM MONO_ORACLE_TEST");
-			Console.WriteLine("     String Value: " + varchar2_value);
-
-			Console.WriteLine("  Read Scalar: number_whole_value");
-			decimal number_whole_value = (decimal) 
-			ReadScalar (con,"SELECT MAX(number_whole_value) FROM MONO_ORACLE_TEST");
-			Console.WriteLine("     Int32 Value: " + number_whole_value.ToString());
-
-			Console.WriteLine("  Read Scalar: number_scaled_value");
-			decimal number_scaled_value = (decimal) 
-			ReadScalar (con,"SELECT number_scaled_value FROM MONO_ORACLE_TEST");
-			Console.WriteLine("     Decimal Value: " + number_scaled_value.ToString());
-		
-			Console.WriteLine("  Read Scalar: date_value");
-			DateTime date_value = (DateTime) 
-			ReadScalar (con,"SELECT date_value FROM MONO_ORACLE_TEST");
-			Console.WriteLine("     DateTime Value: " + date_value.ToString());
-			
-			Console.WriteLine("  Read Scalar: clob_value");
-			string clob_value = (string) 
-			ReadScalar (con,"SELECT clob_value FROM MONO_ORACLE_TEST");
-			Console.WriteLine("     CLOB Value: " + clob_value);
-
-			Console.WriteLine("  Read Scalar: blob_value");
-			byte[] blob_value = (byte[]) 
-			ReadScalar (con,"SELECT blob_value FROM MONO_ORACLE_TEST");
-			string sblob_value = GetHexString (blob_value);
-			Console.WriteLine("     BLOB Value: " + sblob_value);
-			
-			// OracleCommand.ExecuteOracleScalar
-			Console.WriteLine(" -ExecuteOracleScalar tests...");
-			Console.WriteLine("  Read Oracle Scalar: varchar2_value");
-			ReadOracleScalar (con,"SELECT MAX(varchar2_value) FROM MONO_ORACLE_TEST");
-
-			Console.WriteLine("  Read Oracle Scalar: number_whole_value");
-			ReadOracleScalar (con,"SELECT MAX(number_whole_value) FROM MONO_ORACLE_TEST");
-
-			Console.WriteLine("  Read Oracle Scalar: number_scaled_value");
-			ReadOracleScalar (con,"SELECT number_scaled_value FROM MONO_ORACLE_TEST");
-		
-			Console.WriteLine("  Read Oracle Scalar: date_value");
-			ReadOracleScalar (con,"SELECT date_value FROM MONO_ORACLE_TEST");
-			
-			Console.WriteLine("  Read Oracle Scalar: clob_value");
-			ReadOracleScalar (con,"SELECT clob_value FROM MONO_ORACLE_TEST");
-
-			Console.WriteLine("  Read Oracle Scalar: blob_value");
-			ReadOracleScalar (con,"SELECT blob_value FROM MONO_ORACLE_TEST");
-		}
-
-		static object ReadScalar (OracleConnection con, string selectSql) 
-		{
-			OracleCommand cmd = null;
-			cmd = con.CreateCommand();
-			cmd.CommandText = selectSql;
-
-			object o = cmd.ExecuteScalar ();
-
-			string dataType = o.GetType ().ToString ();
-			Console.WriteLine ("       DataType: " + dataType);
-			return o;
-		}
-
-		static void ReadOracleScalar (OracleConnection con, string selectSql) 
-		{
-			OracleCommand cmd = null;
-			cmd = con.CreateCommand();
-			cmd.CommandText = selectSql;
-
-			object o = cmd.ExecuteOracleScalar ();
-
-			string dataType = o.GetType ().ToString ();
-			Console.WriteLine ("       DataType: " + dataType);
-			if (dataType.Equals("System.Data.OracleClient.OracleLob"))
-				o = ((OracleLob) o).Value;
-			if (o.GetType ().ToString ().Equals ("System.Byte[]"))
-				o = GetHexString ((byte[])o);
-			
-			Console.WriteLine ("          Value: " + o.ToString ());
-		}
-
-		static void ReadSimpleTest(OracleConnection con, string selectSql) 
+		private bool ReadSimpleTest(OracleConnection con, string selectSql) 
 		{
 			OracleCommand cmd = null;
 			OracleDataReader reader = null;
@@ -596,9 +291,436 @@ namespace dotNetCore.Data.OracleClient.test
 				}
 			}
 			if(r == 0)
+			{
 				Console.WriteLine("  No data returned.");
+				return false;
+			}
+			return true;
 		}
-		
+
+		private object ReadScalar (OracleConnection con, string selectSql) 
+		{
+			OracleCommand cmd = null;
+			cmd = con.CreateCommand();
+			cmd.CommandText = selectSql;
+
+			object o = cmd.ExecuteScalar ();
+
+			string dataType = o.GetType ().ToString ();
+			Console.WriteLine ("       DataType: " + dataType);
+			return o;
+		}
+
+		private bool ReadOracleScalar (OracleConnection con, string selectSql) 
+		{
+			OracleCommand cmd = null;
+			cmd = con.CreateCommand();
+			cmd.CommandText = selectSql;
+
+			object o = cmd.ExecuteOracleScalar();
+
+			string dataType = o.GetType().ToString();
+			Console.WriteLine("       DataType: " + dataType);
+			if (dataType.Equals("System.Data.OracleClient.OracleLob"))
+				o =((OracleLob)o).Value;
+			if (o.GetType().ToString().Equals("System.Byte[]"))
+				o = GetHexString((byte[])o);
+			
+			Console.WriteLine("          Value: " + o.ToString());
+			return !string.IsNullOrEmpty(o.ToString());
+		}
+
+		[Fact]
+		public void InsertBlobTest()
+        {
+			using (var con = new OracleConnection(connectionString))
+            {
+				con.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
+				con.StateChange += new StateChangeEventHandler (OnStateChange);
+				con.Open ();
+
+				SetupMyPackage(con);
+				
+				byte[] ByteArray = new byte[2000]; // test Blob data
+				byte j = 0;
+				for (int i = 0; i < ByteArray.Length; i++) {
+					ByteArray[i] = j;
+					if (j > 255)
+						j = 0;
+					j++;
+				}
+
+				string sproc = "MyPackage" + ".InsertBlob";
+
+				OracleCommand cmd = new OracleCommand();
+				cmd.CommandText = sproc;
+				cmd.CommandType = CommandType.StoredProcedure;
+				cmd.Connection = con;
+				cmd.Transaction = cmd.Connection.BeginTransaction();
+
+				try {
+					OracleParameter p1 = new OracleParameter("i_Sig_File", OracleType.Blob);
+					p1.Direction = ParameterDirection.Input;
+
+					OracleLob lob2 = GetOracleLob(cmd.Transaction, ByteArray);
+					p1.Value = lob2.Value;
+
+					cmd.Parameters.Add(p1);
+
+					cmd.ExecuteNonQuery();
+
+					cmd.Transaction.Commit();
+				
+					OracleCommand select = con.CreateCommand ();
+					select.CommandText = "SELECT BLOB_COLUMN FROM BLOBTEST2";
+
+					OracleDataReader reader = select.ExecuteReader();
+					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
+
+					if (reader.IsDBNull(0))
+						Assert.True(false, "Lob IsNull");
+					else {
+						OracleLob lob = reader.GetOracleLob (0);
+						if (lob == OracleLob.Null)
+							Assert.True(false, "Lob is OracleLob.Null");
+						else {
+							byte[] blob = (byte[]) lob.Value;
+							string result = GetHexString(blob);
+							Assert.True(ByteArrayCompare (ByteArray, blob), "ByteArray and blob are not the same: bad");
+						}
+					}
+				}
+				catch(Exception e) {
+					Assert.True(false, e.Message);
+				}
+			}
+        }
+
+        [Fact]
+        public void ConnectionInfo()
+        {
+			OracleConnection con1 = new OracleConnection();
+			try
+			{
+				Assert.True(string.IsNullOrEmpty(con1.DataSource));
+
+				con1.ConnectionString = connectionString;
+
+				con1.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
+				con1.StateChange += new StateChangeEventHandler (OnStateChange);
+
+				con1.Open ();
+
+				Assert.True(!string.IsNullOrEmpty(con1.ServerVersion));
+
+				Assert.True(con1.DataSource.Equals(dataSource));
+
+			} catch (System.Exception e) {
+				Assert.True(false, e.Message);
+			}
+			finally
+			{
+				if (con1 != null)
+				{
+					con1.Close ();
+				}
+				else
+				{
+					Assert.True(false, "Conexão nula.");
+				}
+            	con1 = null;
+			}
+        }
+
+		[Fact]
+		private void MonoTest()  
+		{
+			using (var con = new OracleConnection(connectionString))
+            {
+				con.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
+				con.StateChange += new StateChangeEventHandler (OnStateChange);
+				con.Open ();
+
+				try {
+					OracleCommand cmd2 = con.CreateCommand ();
+					cmd2.CommandText = "DROP TABLE MONO_ORACLE_TEST";
+					cmd2.ExecuteNonQuery ();
+				}
+				catch (OracleException) {
+					// ignore if table already exists
+				}
+
+				OracleCommand cmd = new OracleCommand();
+				cmd.Connection = con;
+				cmd.CommandText = "CREATE TABLE MONO_ORACLE_TEST ( " +
+					" varchar2_value VarChar2(32),  " +
+					" long_value long, " +
+					" number_whole_value Number(18), " +
+					" number_scaled_value Number(18,2), " +
+					" number_integer_value Integer, " +
+					" float_value Float, " +
+					" date_value Date, " +
+					" char_value Char(32), " +
+					" clob_value Clob, " +
+					" blob_value Blob, " +
+					" clob_empty_value Clob, " +
+					" blob_empty_value Blob, " +
+					" varchar2_null_value VarChar2(32),  " +
+					" number_whole_null_value Number(18), " +
+					" number_scaled_null_value Number(18,2), " +
+					" number_integer_null_value Integer, " +
+					" float_null_value Float, " +
+					" date_null_value Date, " +
+					" char_null_value Char(32), " +
+					" clob_null_value Clob, " +
+					" blob_null_value Blob " +
+					")";
+
+				cmd.ExecuteNonQuery();
+
+				OracleTransaction trans = con.BeginTransaction ();
+
+				cmd = new OracleCommand();
+				cmd.Connection = con;
+				cmd.Transaction = trans;
+				cmd.CommandText = "INSERT INTO mono_oracle_test " +
+					" ( varchar2_value,  " +
+					"  long_value, " +
+					"  number_whole_value, " +
+					"  number_scaled_value, " +
+					"  number_integer_value, " +
+					"  float_value, " +
+					"  date_value, " +
+					"  char_value, " +
+					"  clob_value, " +
+					"  blob_value, " +
+					"  clob_empty_value, " +
+					"  blob_empty_value " +
+					") " +
+					" VALUES( " +
+					"  'Mono', " +
+					"  'This is a LONG column', " +
+					"  123, " +
+					"  456.78, " +
+					"  8765, " +
+					"  235.2, " +
+					"  TO_DATE( '2004-12-31', 'YYYY-MM-DD' ), " +
+					"  'US', " +
+					"  EMPTY_CLOB(), " +
+					"  EMPTY_BLOB()," +
+					"  EMPTY_CLOB(), " +
+					"  EMPTY_BLOB()" +
+					")";
+
+				cmd.ExecuteNonQuery();
+
+				// update BLOB and CLOB columns
+				OracleCommand select = con.CreateCommand ();
+				select.Transaction = trans;
+				select.CommandText = "SELECT CLOB_VALUE, BLOB_VALUE FROM MONO_ORACLE_TEST FOR UPDATE";
+				OracleDataReader reader = select.ExecuteReader ();
+
+				Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
+
+				// update clob_value
+				OracleLob clob = reader.GetOracleLob(0);
+				byte[] bytes = null;
+				UnicodeEncoding encoding = new UnicodeEncoding ();
+				bytes = encoding.GetBytes ("Mono is fun!");
+				clob.Write(bytes, 0, bytes.Length);
+				clob.Close();
+
+				// update blob_value
+				OracleLob blob = reader.GetOracleLob(1);
+				bytes = new byte[6] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x036 };
+				blob.Write(bytes, 0, bytes.Length);
+				blob.Close();
+				
+				trans.Commit();
+
+				// OracleCommand.ExecuteReader of MONO_ORACLE_TEST table
+				Assert.True(ReadSimpleTest(con, "SELECT * FROM MONO_ORACLE_TEST"), "Erro na consulta do MONO_ORACLE_TEST");
+				
+
+				// OracleCommand.ExecuteScalar
+				string varchar2_value = (string)ReadScalar(con,"SELECT MAX(varchar2_value) FROM MONO_ORACLE_TEST");
+				Assert.True(!string.IsNullOrEmpty(varchar2_value), "Error Read Scalar: varchar2_value");
+
+				decimal? number_whole_value = (decimal?)ReadScalar(con,"SELECT MAX(number_whole_value) FROM MONO_ORACLE_TEST");
+				Assert.True(number_whole_value.GetValueOrDefault() > 0, "Error Read Scalar: number_whole_value");
+
+				decimal? number_scaled_value = (decimal?)ReadScalar(con,"SELECT number_scaled_value FROM MONO_ORACLE_TEST");
+				Assert.True(number_scaled_value.GetValueOrDefault() > 0, "Error Read Scalar: number_scaled_value");
+			
+				DateTime? date_value = (DateTime?)ReadScalar(con,"SELECT date_value FROM MONO_ORACLE_TEST");
+				Assert.True(date_value.GetValueOrDefault().ToBinary() > 0, "Error Read Scalar: date_value");
+				
+				string clob_value = (string)ReadScalar(con,"SELECT clob_value FROM MONO_ORACLE_TEST");
+				Assert.True(!string.IsNullOrEmpty(clob_value), "Error Read Scalar: clob_value");
+
+				byte[] blob_value = (byte[])ReadScalar(con,"SELECT blob_value FROM MONO_ORACLE_TEST");
+				Assert.True(blob_value.Length > 0, "Error Read Scalar: blob_value");
+				
+				// OracleCommand.ExecuteOracleScalar
+				Assert.True(ReadOracleScalar(con,"SELECT MAX(varchar2_value) FROM MONO_ORACLE_TEST"), "Error Read Oracle Scalar: varchar2_value");
+
+				Assert.True(ReadOracleScalar(con,"SELECT MAX(number_whole_value) FROM MONO_ORACLE_TEST"), "Error Read Oracle Scalar: number_whole_value");
+
+				Assert.True(ReadOracleScalar(con,"SELECT number_scaled_value FROM MONO_ORACLE_TEST"), "Error Read Oracle Scalar: number_scaled_value");
+
+				Assert.True(ReadOracleScalar(con,"SELECT date_value FROM MONO_ORACLE_TEST"), "Error Read Oracle Scalar: date_value");
+			
+				Assert.True(ReadOracleScalar(con,"SELECT clob_value FROM MONO_ORACLE_TEST"), "Error Read Oracle Scalar: clob_value");
+
+				Assert.True(ReadOracleScalar(con,"SELECT blob_value FROM MONO_ORACLE_TEST"), "Error Read Oracle Scalar: blob_value");
+
+			}
+			
+		}
+
+		[Fact]
+		private void CLOBTest ()
+		{
+			using (var connection = new OracleConnection(connectionString))
+            {
+				connection.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler (OnStateChange);
+				connection.Open ();
+
+				OracleTransaction transaction = connection.BeginTransaction ();
+
+				try {
+					OracleCommand cmd2 = connection.CreateCommand ();
+					cmd2.Transaction = transaction;
+					cmd2.CommandText = "DROP TABLE CLOBTEST";
+					cmd2.ExecuteNonQuery ();
+				}
+				catch (OracleException) {
+					// ignore if table already exists
+				}
+
+				OracleCommand create = connection.CreateCommand ();
+				create.Transaction = transaction;
+				create.CommandText = "CREATE TABLE CLOBTEST (CLOB_COLUMN CLOB)";
+				create.ExecuteNonQuery ();
+
+				OracleCommand insert = connection.CreateCommand ();
+				insert.Transaction = transaction;
+				insert.CommandText = "INSERT INTO CLOBTEST VALUES (EMPTY_CLOB())";
+				insert.ExecuteNonQuery ();
+
+				OracleCommand select = connection.CreateCommand();
+				select.Transaction = transaction;
+				select.CommandText = "SELECT CLOB_COLUMN FROM CLOBTEST FOR UPDATE";
+
+				using (OracleDataReader reader = select.ExecuteReader())
+				{
+					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
+
+					using (OracleLob lob = reader.GetOracleLob(0))
+					{
+						Assert.True(lob.Length == 0, string.Format("  LENGTH: {0}", lob.Length));
+						Assert.True(lob.ChunkSize == 8132, string.Format("  CHUNK SIZE: {0}", lob.ChunkSize));
+
+						UnicodeEncoding encoding = new UnicodeEncoding ();
+
+						byte[] value = new byte [lob.Length * 2];
+						Assert.True(lob.Position == 0, string.Format("  CURRENT POSITION: {0}", lob.Position));
+						value = encoding.GetBytes("TEST ME!");
+						lob.Write(value, 0, value.Length);
+
+						Assert.True(lob.Position == 8, string.Format("  CURRENT POSITION: {0}", lob.Position));
+
+						lob.Seek (1, SeekOrigin.Begin);
+
+						Assert.True(lob.Position == 1, string.Format("  CURRENT POSITION: {0}", lob.Position));
+
+						value = new byte [lob.Length * 2];
+						lob.Read(value, 0, value.Length);
+
+						Assert.True(!string.IsNullOrEmpty(encoding.GetString (value)), "  Read Value NULL");
+
+						Assert.True(lob.Position == 8, string.Format("  CURRENT POSITION: {0}", lob.Position));
+					}
+				}
+				transaction.Commit ();
+			}
+		}
+
+		[Fact]
+		public void BLOBTest () 
+		{
+			using (var connection = new OracleConnection(connectionString))
+            {
+				connection.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler (OnStateChange);
+				connection.Open ();
+				
+				OracleTransaction transaction = connection.BeginTransaction ();
+
+				try {
+					OracleCommand cmd2 = connection.CreateCommand ();
+					cmd2.Transaction = transaction;
+					cmd2.CommandText = "DROP TABLE BLOBTEST";
+					cmd2.ExecuteNonQuery ();
+				}
+				catch (OracleException) {
+					// ignore if table already exists
+				}
+
+				OracleCommand create = connection.CreateCommand ();
+				create.Transaction = transaction;
+				create.CommandText = "CREATE TABLE BLOBTEST (BLOB_COLUMN BLOB)";
+				create.ExecuteNonQuery ();
+
+				OracleCommand insert = connection.CreateCommand ();
+				insert.Transaction = transaction;
+				insert.CommandText = "INSERT INTO BLOBTEST VALUES (EMPTY_BLOB())";
+				insert.ExecuteNonQuery ();
+
+				OracleCommand select = connection.CreateCommand ();
+				select.Transaction = transaction;
+				select.CommandText = "SELECT BLOB_COLUMN FROM BLOBTEST FOR UPDATE";
+
+				using (OracleDataReader reader = select.ExecuteReader())
+				{
+					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
+
+					using (OracleLob lob = reader.GetOracleLob(0))
+					{
+						byte[] value = null;
+						byte[] bytes = new byte[6];
+						bytes[0] = 0x31;
+						bytes[1] = 0x32;
+						bytes[2] = 0x33;
+						bytes[3] = 0x34;
+						bytes[4] = 0x35;
+						bytes[5] = 0x36;
+
+						lob.Write(bytes, 0, bytes.Length);
+						Assert.True(lob.Length == 6, string.Format("  LENGTH: {0}", lob.Length));
+
+						lob.Seek(1, SeekOrigin.Begin);
+						Assert.True(lob.Position == 1, string.Format("  CURRENT POSITION: {0}", lob.Position));
+
+						value = new byte [lob.Length];
+						lob.Read(value, 0, value.Length);
+						Assert.True(lob.Position == 6, string.Format("  CURRENT POSITION: {0}", lob.Position));
+						
+						Assert.True(ByteArrayCompare((byte[])lob.Value, bytes), "Error compare bytes");
+
+						Assert.True(lob.Position == 6, string.Format("  CURRENT POSITION: {0}", lob.Position));
+					}
+				}
+				transaction.Commit ();
+			}
+		}
+
+
+
+
+/*
+
 		static void DataAdapterTest (OracleConnection connection)
 		{
 			Console.WriteLine("  Create select command...");
@@ -1281,161 +1403,6 @@ namespace dotNetCore.Data.OracleClient.test
 
 			cmd.ExecuteNonQuery ();
 			trans.Commit();
-		}
-
-		public static void CLOBTest (OracleConnection connection)
-		{		
-			Console.WriteLine ("  BEGIN TRANSACTION ...");
-
-			OracleTransaction transaction = connection.BeginTransaction ();
-
-			Console.WriteLine ("  Drop table CLOBTEST ...");
-			try {
-				OracleCommand cmd2 = connection.CreateCommand ();
-				cmd2.Transaction = transaction;
-				cmd2.CommandText = "DROP TABLE CLOBTEST";
-				cmd2.ExecuteNonQuery ();
-			}
-			catch (OracleException) {
-				// ignore if table already exists
-			}
-
-			Console.WriteLine ("  CREATE TABLE ...");
-
-			OracleCommand create = connection.CreateCommand ();
-			create.Transaction = transaction;
-			create.CommandText = "CREATE TABLE CLOBTEST (CLOB_COLUMN CLOB)";
-			create.ExecuteNonQuery ();
-
-			Console.WriteLine ("  INSERT RECORD ...");
-
-			OracleCommand insert = connection.CreateCommand ();
-			insert.Transaction = transaction;
-			insert.CommandText = "INSERT INTO CLOBTEST VALUES (EMPTY_CLOB())";
-			insert.ExecuteNonQuery ();
-
-			OracleCommand select = connection.CreateCommand ();
-			select.Transaction = transaction;
-			select.CommandText = "SELECT CLOB_COLUMN FROM CLOBTEST FOR UPDATE";
-			Console.WriteLine ("  SELECTING A CLOB (CHARACTER) VALUE FROM CLOBTEST");
-
-			OracleDataReader reader = select.ExecuteReader ();
-			if (!reader.Read ())
-				Console.WriteLine ("ERROR: RECORD NOT FOUND");
-
-			Console.WriteLine ("  TESTING OracleLob OBJECT ...");
-			OracleLob lob = reader.GetOracleLob (0);
-			Console.WriteLine ("  LENGTH: {0}", lob.Length);
-			Console.WriteLine ("  CHUNK SIZE: {0}", lob.ChunkSize);
-
-			UnicodeEncoding encoding = new UnicodeEncoding ();
-
-			byte[] value = new byte [lob.Length * 2];
-
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-			Console.WriteLine ("  UPDATING VALUE TO 'TEST ME!'");
-			value = encoding.GetBytes ("TEST ME!");
-			lob.Write (value, 0, value.Length);
-
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-			Console.WriteLine ("  RE-READ VALUE...");
-			lob.Seek (1, SeekOrigin.Begin);
-
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-			value = new byte [lob.Length * 2];
-			lob.Read (value, 0, value.Length);
-			Console.WriteLine ("  VALUE: {0}", encoding.GetString (value));
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-
-			Console.WriteLine ("  CLOSE OracleLob...");
-			lob.Close ();
-
-			Console.WriteLine ("  CLOSING READER...");
-			
-			reader.Close ();
-			transaction.Commit ();
-		}
-
-		public static void BLOBTest (OracleConnection connection) 
-		{
-			Console.WriteLine ("  BEGIN TRANSACTION ...");
-
-			OracleTransaction transaction = connection.BeginTransaction ();
-
-			Console.WriteLine ("  Drop table BLOBTEST ...");
-			try {
-				OracleCommand cmd2 = connection.CreateCommand ();
-				cmd2.Transaction = transaction;
-				cmd2.CommandText = "DROP TABLE BLOBTEST";
-				cmd2.ExecuteNonQuery ();
-			}
-			catch (OracleException) {
-				// ignore if table already exists
-			}
-
-			Console.WriteLine ("  CREATE TABLE ...");
-
-			OracleCommand create = connection.CreateCommand ();
-			create.Transaction = transaction;
-			create.CommandText = "CREATE TABLE BLOBTEST (BLOB_COLUMN BLOB)";
-			create.ExecuteNonQuery ();
-
-			Console.WriteLine ("  INSERT RECORD ...");
-
-			OracleCommand insert = connection.CreateCommand ();
-			insert.Transaction = transaction;
-			insert.CommandText = "INSERT INTO BLOBTEST VALUES (EMPTY_BLOB())";
-			insert.ExecuteNonQuery ();
-
-			OracleCommand select = connection.CreateCommand ();
-			select.Transaction = transaction;
-			select.CommandText = "SELECT BLOB_COLUMN FROM BLOBTEST FOR UPDATE";
-			Console.WriteLine ("  SELECTING A BLOB (Binary) VALUE FROM BLOBTEST");
-
-			OracleDataReader reader = select.ExecuteReader ();
-			if (!reader.Read ())
-				Console.WriteLine ("ERROR: RECORD NOT FOUND");
-
-			Console.WriteLine ("  TESTING OracleLob OBJECT ...");
-			OracleLob lob = reader.GetOracleLob (0);
-			
-			byte[] value = null;
-			string bvalue = "";
-
-			Console.WriteLine ("  UPDATING VALUE");
-
-			byte[] bytes = new byte[6];
-			bytes[0] = 0x31;
-			bytes[1] = 0x32;
-			bytes[2] = 0x33;
-			bytes[3] = 0x34;
-			bytes[4] = 0x35;
-			bytes[5] = 0x36;
-
-			lob.Write (bytes, 0, bytes.Length);
-
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-			Console.WriteLine ("  RE-READ VALUE...");
-			lob.Seek (1, SeekOrigin.Begin);
-
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-			value = new byte [lob.Length];
-			lob.Read (value, 0, value.Length);
-			
-			bvalue = "";
-			if (value.GetType ().ToString ().Equals ("System.Byte[]")) 
-				bvalue = GetHexString (value);
-			Console.WriteLine ("  Bytes: " + bvalue);
-
-			Console.WriteLine ("  CURRENT POSITION: {0}", lob.Position);
-
-			Console.WriteLine ("  CLOSE OracleLob...");
-			lob.Close ();
-
-			Console.WriteLine ("  CLOSING READER...");
-			
-			reader.Close ();
-			transaction.Commit ();
 		}
 
 		static void Wait(string msg) 
