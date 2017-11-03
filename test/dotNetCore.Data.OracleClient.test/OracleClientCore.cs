@@ -25,13 +25,13 @@ namespace dotNetCore.Data.OracleClient.test
 			connectionString = string.Format("Data Source={0};User ID={1};Password={2}", dataSource, userID, password);
 		}
 
-		private void OnStateChange (object sender, StateChangeEventArgs e) 
+		private void OnStateChange(object sender, StateChangeEventArgs e) 
 		{
-			Console.WriteLine("StateChange CurrentSate:" + e.CurrentState.ToString ());
-			Console.WriteLine("StateChange OriginalState:" + e.OriginalState.ToString ());
+			Console.WriteLine("StateChange CurrentSate:" + e.CurrentState.ToString());
+			Console.WriteLine("StateChange OriginalState:" + e.OriginalState.ToString());
 		}
 		
-		private void OnInfoMessage (object sender, OracleInfoMessageEventArgs e) 
+		private void OnInfoMessage(object sender, OracleInfoMessageEventArgs e) 
 		{
 			Console.WriteLine("InfoMessage Message: " + e.Message.ToString());
 			Console.WriteLine("InfoMessage Code: " + e.Code.ToString());
@@ -40,37 +40,37 @@ namespace dotNetCore.Data.OracleClient.test
 
 		// use this function to read a byte array into a string
 		// for easy display of binary data, such as, a BLOB value
-		private string GetHexString (byte[] bytes)
+		private string GetHexString(byte[] bytes)
 		{ 			
 			string bvalue = "";
 			
 			StringBuilder sb2 = new StringBuilder();
-			for (int z = 0; z < bytes.Length; z++) {
+			for(int z = 0; z < bytes.Length; z++){
 				byte byt = bytes[z];
-				if (byt < 0x10)
-					sb2.Append ("0");
-				sb2.Append (byt.ToString("x"));
+				if(byt < 0x10)
+					sb2.Append("0");
+				sb2.Append(byt.ToString("x"));
 			}
-			if (sb2.Length > 0)
-				bvalue = "0x" + sb2.ToString ();
+			if(sb2.Length > 0)
+				bvalue = "0x" + sb2.ToString();
 	
 			return bvalue;
 		}
 
-		private byte[] ByteArrayCombine (byte[] b1, byte[] b2) 
+		private byte[] ByteArrayCombine(byte[] b1, byte[] b2) 
 		{
-			if (b1 == null)
+			if(b1 == null)
 				b1 = new byte[0];
-			if (b2 == null)
+			if(b2 == null)
 				b2 = new byte[0];
 		
 			byte[] bytes = new byte[b1.Length + b2.Length];
 			int i = 0;
-			for (int j = 0; j < b1.Length; j++) {
+			for(int j = 0; j < b1.Length; j++){
 				bytes[i] = b1[j];
 				i++;
 			}
-			for (int k = 0; k < b2.Length; k++) {
+			for(int k = 0; k < b2.Length; k++){
 				bytes[i] = b2[k];
 				i++;
 			}
@@ -79,21 +79,21 @@ namespace dotNetCore.Data.OracleClient.test
 
 		private bool ByteArrayCompare(byte[] ba1, byte[] ba2)
 		{
-		    if (ba1 == null && ba2 == null)
+		    if(ba1 == null && ba2 == null)
 		        return true;
 
-		    if (ba1 == null)
+		    if(ba1 == null)
 		        return false;
 
-		    if (ba2 == null)
+		    if(ba2 == null)
 		        return false;
 
-		    if (ba1.Length != ba2.Length)
+		    if(ba1.Length != ba2.Length)
 		        return false;
 
-		    for (int i = 0; i < ba1.Length; i++)
+		    for(int i = 0; i < ba1.Length; i++)
 		    {
-		        if (ba1[i] != ba2[i])
+		        if(ba1[i] != ba2[i])
 		            return false;
 		    }
 
@@ -109,7 +109,7 @@ namespace dotNetCore.Data.OracleClient.test
 		    + "END;";
 
 		    OracleLob tempLob = OracleLob.Null;
-		    if (blob != null)
+		    if(blob != null)
 		    {
 		        // Create a new command using the same connection
 		        OracleCommand command = transaction.Connection.CreateCommand();
@@ -146,17 +146,17 @@ namespace dotNetCore.Data.OracleClient.test
 		private void SetupMyPackage(OracleConnection con) 
 		{
 			try {
-				OracleCommand cmd2 = con.CreateCommand ();
+				OracleCommand cmd2 = con.CreateCommand();
 				cmd2.CommandText = "DROP TABLE BLOBTEST2";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch (OracleException) {
+			catch(OracleException){
 				// ignore if table already exists
 			}
 
-			OracleCommand create = con.CreateCommand ();
-			create.CommandText = "CREATE TABLE BLOBTEST2 (BLOB_COLUMN BLOB)";
-			create.ExecuteNonQuery ();
+			OracleCommand create = con.CreateCommand();
+			create.CommandText = "CREATE TABLE BLOBTEST2(BLOB_COLUMN BLOB)";
+			create.ExecuteNonQuery();
 
 			create.CommandText = "commit";
 			create.ExecuteNonQuery();
@@ -164,22 +164,111 @@ namespace dotNetCore.Data.OracleClient.test
 			OracleCommand cmd = con.CreateCommand();
 			cmd.CommandText = 
 				"CREATE OR REPLACE PACKAGE MyPackage AS\n" +
-				" Procedure InsertBlob (i_Sig_File blob);\n" +
+				" Procedure InsertBlob(i_Sig_File blob);\n" +
 				"END MyPackage;";
 			cmd.ExecuteNonQuery();
 
 			cmd.CommandText = 
 				"CREATE OR REPLACE PACKAGE BODY MyPackage AS\n" +
-				"   Procedure InsertBlob (i_Sig_File blob)\n" +
+				"   Procedure InsertBlob(i_Sig_File blob)\n" +
 				"   IS\n" +
 				"   BEGIN\n" +
-				"	INSERT INTO BLOBTEST2 (BLOB_COLUMN) VALUES(i_Sig_File); " +
+				"	INSERT INTO BLOBTEST2(BLOB_COLUMN) VALUES(i_Sig_File); " +
 				"   END InsertBlob; " +
 				"END MyPackage;";
 			cmd.ExecuteNonQuery();
 
 			cmd.CommandText = "commit";
 			cmd.ExecuteNonQuery();
+		}
+
+		private void SetupEMP(OracleConnection con) 
+		{
+			try {
+				OracleCommand cmd2 = con.CreateCommand();
+				cmd2.CommandText = "DROP TABLE emp";
+				cmd2.ExecuteNonQuery();
+			}
+			catch(OracleException){
+				// ignore if table already exists
+			}
+			try {
+				OracleCommand cmd3 = con.CreateCommand();
+				cmd3.CommandText = "DROP TABLE dept";
+				cmd3.ExecuteNonQuery();
+			}
+			catch(OracleException){
+				// ignore if table already exists
+			}
+
+			OracleCommand create = con.CreateCommand();
+			create.CommandText = "create table dept(deptno number(2,0), dname varchar2(14), loc varchar2(13), constraint pk_dept primary key(deptno))";
+			create.ExecuteNonQuery();
+
+			create.CommandText = "create table emp(empno number(4,0), ename varchar2(10), job varchar2(9), mgr number(4,0), hiredate date, sal number(7,2), " +
+  								 "comm number(7,2), deptno number(2,0), constraint pk_emp primary key(empno), constraint fk_deptno foreign key(deptno) references dept(deptno))";
+			create.ExecuteNonQuery();
+
+			create.CommandText = "commit";
+			create.ExecuteNonQuery();
+
+			OracleCommand cmdInsert = con.CreateCommand();
+			cmdInsert.CommandText = "insert into DEPT(DEPTNO, DNAME, LOC) values(10, 'ACCOUNTING', 'NEW YORK')";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into dept values(20, 'RESEARCH', 'DALLAS')";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into dept values(30, 'SALES', 'CHICAGO')";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into dept values(40, 'OPERATIONS', 'BOSTON')";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7839, 'KING', 'PRESIDENT', null, to_date('17-11-1981','dd-mm-yyyy'), 5000, null, 10)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7698, 'BLAKE', 'MANAGER', 7839, to_date('1-5-1981','dd-mm-yyyy'), 2850, null, 30)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7782, 'CLARK', 'MANAGER', 7839, to_date('9-6-1981','dd-mm-yyyy'), 2450, null, 10)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7566, 'JONES', 'MANAGER', 7839, to_date('2-4-1981','dd-mm-yyyy'), 2975, null, 20)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7788, 'SCOTT', 'ANALYST', 7566, to_date('13-JUL-87','dd-mm-rr') - 85, 3000, null, 20)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7902, 'FORD', 'ANALYST', 7566, to_date('3-12-1981','dd-mm-yyyy'), 3000, null, 20)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7369, 'SMITH', 'CLERK', 7902, to_date('17-12-1980','dd-mm-yyyy'), 800, null, 20)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7499, 'ALLEN', 'SALESMAN', 7698, to_date('20-2-1981','dd-mm-yyyy'), 1600, 300, 30)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7521, 'WARD', 'SALESMAN', 7698, to_date('22-2-1981','dd-mm-yyyy'), 1250, 500, 30)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7654, 'MARTIN', 'SALESMAN', 7698, to_date('28-9-1981','dd-mm-yyyy'), 1250, 1400, 30)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7844, 'TURNER', 'SALESMAN', 7698, to_date('8-9-1981','dd-mm-yyyy'), 1500, 0, 30)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7876, 'ADAMS', 'CLERK', 7788, to_date('13-JUL-87', 'dd-mm-rr') - 51, 1100, null, 20)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7900, 'JAMES', 'CLERK', 7698, to_date('3-12-1981','dd-mm-yyyy'), 950, null, 30)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "insert into emp values(7934, 'MILLER', 'CLERK', 7782, to_date('23-1-1982','dd-mm-yyyy'), 1300, null, 10)";
+			cmdInsert.ExecuteNonQuery();
+
+			cmdInsert.CommandText = "commit";
+			cmdInsert.ExecuteNonQuery();
 		}
 
 		private bool ReadSimpleTest(OracleConnection con, string selectSql) 
@@ -195,7 +284,7 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("    Schema");
 			DataTable table;
 			table = reader.GetSchemaTable();
-			for(int c = 0; c < reader.FieldCount; c++) {
+			for(int c = 0; c < reader.FieldCount; c++){
 				Console.WriteLine("  Column " + c.ToString());
 				DataRow row = table.Rows[c];
 			
@@ -215,11 +304,11 @@ namespace dotNetCore.Data.OracleClient.test
 			}
 
 			int r = 0;
-			Console.WriteLine ("    Data");
-			while (reader.Read ()) {
+			Console.WriteLine("    Data");
+			while(reader.Read()){
 				r++;
-				Console.WriteLine ("       Row: " + r.ToString ());
-				for (int f = 0; f < reader.FieldCount; f++) {
+				Console.WriteLine("       Row: " + r.ToString());
+				for(int f = 0; f < reader.FieldCount; f++){
 					string sname = "";
 					object ovalue = "";
 					string svalue = "";
@@ -228,21 +317,21 @@ namespace dotNetCore.Data.OracleClient.test
 					string sDataTypeName = "";
 					string sOraDataType = "";
 
-					sname = reader.GetName (f);
+					sname = reader.GetName(f);
 
-					if (reader.IsDBNull (f)) {
+					if(reader.IsDBNull(f)){
 						ovalue = DBNull.Value;
 						svalue = "";
 						sDataType = "DBNull.Value";
 						sOraDataType = "DBNull.Value";
 					}
 					else {
-						//ovalue = reader.GetValue (f);
-						ovalue = reader.GetOracleValue (f);
+						//ovalue = reader.GetValue(f);
+						ovalue = reader.GetOracleValue(f);
 						object oravalue = null;
 					
-						sDataType = ovalue.GetType ().ToString ();
-						switch (sDataType) {
+						sDataType = ovalue.GetType().ToString();
+						switch(sDataType){
 						case "System.Data.OracleClient.OracleString":
 							oravalue = ((OracleString) ovalue).Value;
 							break;
@@ -252,7 +341,7 @@ namespace dotNetCore.Data.OracleClient.test
 						case "System.Data.OracleClient.OracleLob":
 							OracleLob lob = (OracleLob) ovalue;
 							oravalue = lob.Value;
-							lob.Close ();
+							lob.Close();
 							break;
 						case "System.Data.OracleClient.OracleDateTime":
 							oravalue = ((OracleDateTime) ovalue).Value;
@@ -261,19 +350,19 @@ namespace dotNetCore.Data.OracleClient.test
 							oravalue = GetHexString((byte[])ovalue);
 							break;
 						case "System.Decimal":
-							decimal dec = reader.GetDecimal (f);
+							decimal dec = reader.GetDecimal(f);
 
 							oravalue = (object) dec;
 							break;
 						default:
-							oravalue = ovalue.ToString ();
+							oravalue = ovalue.ToString();
 
 							break;
 						}
 					
-						sOraDataType = oravalue.GetType ().ToString ();
-						if (sOraDataType.Equals ("System.Byte[]")) 
-							svalue = GetHexString ((byte[]) oravalue);
+						sOraDataType = oravalue.GetType().ToString();
+						if(sOraDataType.Equals("System.Byte[]")) 
+							svalue = GetHexString((byte[]) oravalue);
 						else
 							svalue = oravalue.ToString();
 						
@@ -298,20 +387,20 @@ namespace dotNetCore.Data.OracleClient.test
 			return true;
 		}
 
-		private object ReadScalar (OracleConnection con, string selectSql) 
+		private object ReadScalar(OracleConnection con, string selectSql) 
 		{
 			OracleCommand cmd = null;
 			cmd = con.CreateCommand();
 			cmd.CommandText = selectSql;
 
-			object o = cmd.ExecuteScalar ();
+			object o = cmd.ExecuteScalar();
 
-			string dataType = o.GetType ().ToString ();
-			Console.WriteLine ("       DataType: " + dataType);
+			string dataType = o.GetType().ToString();
+			Console.WriteLine("       DataType: " + dataType);
 			return o;
 		}
 
-		private bool ReadOracleScalar (OracleConnection con, string selectSql) 
+		private bool ReadOracleScalar(OracleConnection con, string selectSql) 
 		{
 			OracleCommand cmd = null;
 			cmd = con.CreateCommand();
@@ -321,9 +410,9 @@ namespace dotNetCore.Data.OracleClient.test
 
 			string dataType = o.GetType().ToString();
 			Console.WriteLine("       DataType: " + dataType);
-			if (dataType.Equals("System.Data.OracleClient.OracleLob"))
-				o =((OracleLob)o).Value;
-			if (o.GetType().ToString().Equals("System.Byte[]"))
+			if(dataType.Equals("System.Data.OracleClient.OracleLob"))
+				o = ((OracleLob)o).Value;
+			if(o.GetType().ToString().Equals("System.Byte[]"))
 				o = GetHexString((byte[])o);
 			
 			Console.WriteLine("          Value: " + o.ToString());
@@ -333,19 +422,19 @@ namespace dotNetCore.Data.OracleClient.test
 		[Fact]
 		public void InsertBlobTest()
         {
-			using (var con = new OracleConnection(connectionString))
+			using(var con = new OracleConnection(connectionString))
             {
-				con.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				con.StateChange += new StateChangeEventHandler (OnStateChange);
-				con.Open ();
+				con.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				con.StateChange += new StateChangeEventHandler(OnStateChange);
+				con.Open();
 
 				SetupMyPackage(con);
 				
 				byte[] ByteArray = new byte[2000]; // test Blob data
 				byte j = 0;
-				for (int i = 0; i < ByteArray.Length; i++) {
+				for(int i = 0; i < ByteArray.Length; i++){
 					ByteArray[i] = j;
-					if (j > 255)
+					if(j > 255)
 						j = 0;
 					j++;
 				}
@@ -371,32 +460,32 @@ namespace dotNetCore.Data.OracleClient.test
 
 					cmd.Transaction.Commit();
 				
-					OracleCommand select = con.CreateCommand ();
+					OracleCommand select = con.CreateCommand();
 					select.CommandText = "SELECT BLOB_COLUMN FROM BLOBTEST2";
 
 					OracleDataReader reader = select.ExecuteReader();
 					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
 
-					if (reader.IsDBNull(0))
+					if(reader.IsDBNull(0))
 						Assert.True(false, "Lob IsNull");
 					else {
-						OracleLob lob = reader.GetOracleLob (0);
-						if (lob == OracleLob.Null)
+						OracleLob lob = reader.GetOracleLob(0);
+						if(lob == OracleLob.Null)
 							Assert.True(false, "Lob is OracleLob.Null");
 						else {
 							byte[] blob = (byte[]) lob.Value;
 							string result = GetHexString(blob);
-							Assert.True(ByteArrayCompare (ByteArray, blob), "ByteArray and blob are not the same: bad");
+							Assert.True(ByteArrayCompare(ByteArray, blob), "ByteArray and blob are not the same: bad");
 						}
 					}
 				}
-				catch(Exception e) {
+				catch(Exception e){
 					Assert.True(false, e.Message);
 				}
 			}
         }
 
-        [Fact]
+       [Fact]
         public void ConnectionInfo()
         {
 			OracleConnection con1 = new OracleConnection();
@@ -406,23 +495,23 @@ namespace dotNetCore.Data.OracleClient.test
 
 				con1.ConnectionString = connectionString;
 
-				con1.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				con1.StateChange += new StateChangeEventHandler (OnStateChange);
+				con1.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				con1.StateChange += new StateChangeEventHandler(OnStateChange);
 
-				con1.Open ();
+				con1.Open();
 
 				Assert.True(!string.IsNullOrEmpty(con1.ServerVersion));
 
 				Assert.True(con1.DataSource.Equals(dataSource));
 
-			} catch (System.Exception e) {
+			} catch(System.Exception e){
 				Assert.True(false, e.Message);
 			}
 			finally
 			{
-				if (con1 != null)
+				if(con1 != null)
 				{
-					con1.Close ();
+					con1.Close();
 				}
 				else
 				{
@@ -435,24 +524,24 @@ namespace dotNetCore.Data.OracleClient.test
 		[Fact]
 		private void MonoTest()  
 		{
-			using (var con = new OracleConnection(connectionString))
+			using(var con = new OracleConnection(connectionString))
             {
-				con.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				con.StateChange += new StateChangeEventHandler (OnStateChange);
-				con.Open ();
+				con.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				con.StateChange += new StateChangeEventHandler(OnStateChange);
+				con.Open();
 
 				try {
-					OracleCommand cmd2 = con.CreateCommand ();
+					OracleCommand cmd2 = con.CreateCommand();
 					cmd2.CommandText = "DROP TABLE MONO_ORACLE_TEST";
-					cmd2.ExecuteNonQuery ();
+					cmd2.ExecuteNonQuery();
 				}
-				catch (OracleException) {
+				catch(OracleException){
 					// ignore if table already exists
 				}
 
 				OracleCommand cmd = new OracleCommand();
 				cmd.Connection = con;
-				cmd.CommandText = "CREATE TABLE MONO_ORACLE_TEST ( " +
+				cmd.CommandText = "CREATE TABLE MONO_ORACLE_TEST( " +
 					" varchar2_value VarChar2(32),  " +
 					" long_value long, " +
 					" number_whole_value Number(18), " +
@@ -478,13 +567,13 @@ namespace dotNetCore.Data.OracleClient.test
 
 				cmd.ExecuteNonQuery();
 
-				OracleTransaction trans = con.BeginTransaction ();
+				OracleTransaction trans = con.BeginTransaction();
 
 				cmd = new OracleCommand();
 				cmd.Connection = con;
 				cmd.Transaction = trans;
 				cmd.CommandText = "INSERT INTO mono_oracle_test " +
-					" ( varchar2_value,  " +
+					"( varchar2_value,  " +
 					"  long_value, " +
 					"  number_whole_value, " +
 					"  number_scaled_value, " +
@@ -515,18 +604,18 @@ namespace dotNetCore.Data.OracleClient.test
 				cmd.ExecuteNonQuery();
 
 				// update BLOB and CLOB columns
-				OracleCommand select = con.CreateCommand ();
+				OracleCommand select = con.CreateCommand();
 				select.Transaction = trans;
 				select.CommandText = "SELECT CLOB_VALUE, BLOB_VALUE FROM MONO_ORACLE_TEST FOR UPDATE";
-				OracleDataReader reader = select.ExecuteReader ();
+				OracleDataReader reader = select.ExecuteReader();
 
 				Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
 
 				// update clob_value
 				OracleLob clob = reader.GetOracleLob(0);
 				byte[] bytes = null;
-				UnicodeEncoding encoding = new UnicodeEncoding ();
-				bytes = encoding.GetBytes ("Mono is fun!");
+				UnicodeEncoding encoding = new UnicodeEncoding();
+				bytes = encoding.GetBytes("Mono is fun!");
 				clob.Write(bytes, 0, bytes.Length);
 				clob.Close();
 
@@ -579,114 +668,114 @@ namespace dotNetCore.Data.OracleClient.test
 		}
 
 		[Fact]
-		private void CLOBTest ()
+		private void CLOBTest()
 		{
-			using (var connection = new OracleConnection(connectionString))
+			using(var connection = new OracleConnection(connectionString))
             {
-				connection.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				connection.StateChange += new StateChangeEventHandler (OnStateChange);
-				connection.Open ();
+				connection.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler(OnStateChange);
+				connection.Open();
 
-				OracleTransaction transaction = connection.BeginTransaction ();
+				OracleTransaction transaction = connection.BeginTransaction();
 
 				try {
-					OracleCommand cmd2 = connection.CreateCommand ();
+					OracleCommand cmd2 = connection.CreateCommand();
 					cmd2.Transaction = transaction;
 					cmd2.CommandText = "DROP TABLE CLOBTEST";
-					cmd2.ExecuteNonQuery ();
+					cmd2.ExecuteNonQuery();
 				}
-				catch (OracleException) {
+				catch(OracleException){
 					// ignore if table already exists
 				}
 
-				OracleCommand create = connection.CreateCommand ();
+				OracleCommand create = connection.CreateCommand();
 				create.Transaction = transaction;
-				create.CommandText = "CREATE TABLE CLOBTEST (CLOB_COLUMN CLOB)";
-				create.ExecuteNonQuery ();
+				create.CommandText = "CREATE TABLE CLOBTEST(CLOB_COLUMN CLOB)";
+				create.ExecuteNonQuery();
 
-				OracleCommand insert = connection.CreateCommand ();
+				OracleCommand insert = connection.CreateCommand();
 				insert.Transaction = transaction;
-				insert.CommandText = "INSERT INTO CLOBTEST VALUES (EMPTY_CLOB())";
-				insert.ExecuteNonQuery ();
+				insert.CommandText = "INSERT INTO CLOBTEST VALUES(EMPTY_CLOB())";
+				insert.ExecuteNonQuery();
 
 				OracleCommand select = connection.CreateCommand();
 				select.Transaction = transaction;
 				select.CommandText = "SELECT CLOB_COLUMN FROM CLOBTEST FOR UPDATE";
 
-				using (OracleDataReader reader = select.ExecuteReader())
+				using(OracleDataReader reader = select.ExecuteReader())
 				{
 					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
 
-					using (OracleLob lob = reader.GetOracleLob(0))
+					using(OracleLob lob = reader.GetOracleLob(0))
 					{
 						Assert.True(lob.Length == 0, string.Format("  LENGTH: {0}", lob.Length));
 						Assert.True(lob.ChunkSize == 8132, string.Format("  CHUNK SIZE: {0}", lob.ChunkSize));
 
-						UnicodeEncoding encoding = new UnicodeEncoding ();
+						UnicodeEncoding encoding = new UnicodeEncoding();
 
-						byte[] value = new byte [lob.Length * 2];
+						byte[] value = new byte[lob.Length * 2];
 						Assert.True(lob.Position == 0, string.Format("  CURRENT POSITION: {0}", lob.Position));
 						value = encoding.GetBytes("TEST ME!");
 						lob.Write(value, 0, value.Length);
 
 						Assert.True(lob.Position == 8, string.Format("  CURRENT POSITION: {0}", lob.Position));
 
-						lob.Seek (1, SeekOrigin.Begin);
+						lob.Seek(1, SeekOrigin.Begin);
 
 						Assert.True(lob.Position == 1, string.Format("  CURRENT POSITION: {0}", lob.Position));
 
-						value = new byte [lob.Length * 2];
+						value = new byte[lob.Length * 2];
 						lob.Read(value, 0, value.Length);
 
-						Assert.True(!string.IsNullOrEmpty(encoding.GetString (value)), "  Read Value NULL");
+						Assert.True(!string.IsNullOrEmpty(encoding.GetString(value)), "  Read Value NULL");
 
 						Assert.True(lob.Position == 8, string.Format("  CURRENT POSITION: {0}", lob.Position));
 					}
 				}
-				transaction.Commit ();
+				transaction.Commit();
 			}
 		}
 
 		[Fact]
-		public void BLOBTest () 
+		public void BLOBTest() 
 		{
-			using (var connection = new OracleConnection(connectionString))
+			using(var connection = new OracleConnection(connectionString))
             {
-				connection.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-				connection.StateChange += new StateChangeEventHandler (OnStateChange);
-				connection.Open ();
+				connection.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler(OnStateChange);
+				connection.Open();
 				
-				OracleTransaction transaction = connection.BeginTransaction ();
+				OracleTransaction transaction = connection.BeginTransaction();
 
 				try {
-					OracleCommand cmd2 = connection.CreateCommand ();
+					OracleCommand cmd2 = connection.CreateCommand();
 					cmd2.Transaction = transaction;
 					cmd2.CommandText = "DROP TABLE BLOBTEST";
-					cmd2.ExecuteNonQuery ();
+					cmd2.ExecuteNonQuery();
 				}
-				catch (OracleException) {
+				catch(OracleException){
 					// ignore if table already exists
 				}
 
-				OracleCommand create = connection.CreateCommand ();
+				OracleCommand create = connection.CreateCommand();
 				create.Transaction = transaction;
-				create.CommandText = "CREATE TABLE BLOBTEST (BLOB_COLUMN BLOB)";
-				create.ExecuteNonQuery ();
+				create.CommandText = "CREATE TABLE BLOBTEST(BLOB_COLUMN BLOB)";
+				create.ExecuteNonQuery();
 
-				OracleCommand insert = connection.CreateCommand ();
+				OracleCommand insert = connection.CreateCommand();
 				insert.Transaction = transaction;
-				insert.CommandText = "INSERT INTO BLOBTEST VALUES (EMPTY_BLOB())";
-				insert.ExecuteNonQuery ();
+				insert.CommandText = "INSERT INTO BLOBTEST VALUES(EMPTY_BLOB())";
+				insert.ExecuteNonQuery();
 
-				OracleCommand select = connection.CreateCommand ();
+				OracleCommand select = connection.CreateCommand();
 				select.Transaction = transaction;
 				select.CommandText = "SELECT BLOB_COLUMN FROM BLOBTEST FOR UPDATE";
 
-				using (OracleDataReader reader = select.ExecuteReader())
+				using(OracleDataReader reader = select.ExecuteReader())
 				{
 					Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
 
-					using (OracleLob lob = reader.GetOracleLob(0))
+					using(OracleLob lob = reader.GetOracleLob(0))
 					{
 						byte[] value = null;
 						byte[] bytes = new byte[6];
@@ -703,7 +792,7 @@ namespace dotNetCore.Data.OracleClient.test
 						lob.Seek(1, SeekOrigin.Begin);
 						Assert.True(lob.Position == 1, string.Format("  CURRENT POSITION: {0}", lob.Position));
 
-						value = new byte [lob.Length];
+						value = new byte[lob.Length];
 						lob.Read(value, 0, value.Length);
 						Assert.True(lob.Position == 6, string.Format("  CURRENT POSITION: {0}", lob.Position));
 						
@@ -712,8 +801,54 @@ namespace dotNetCore.Data.OracleClient.test
 						Assert.True(lob.Position == 6, string.Format("  CURRENT POSITION: {0}", lob.Position));
 					}
 				}
-				transaction.Commit ();
+				transaction.Commit();
 			}
+		}
+
+		[Fact]
+		private void DataAdapterTest()
+		{
+			using(var connection = new OracleConnection(connectionString))
+            {
+				connection.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler(OnStateChange);
+				connection.Open();
+				
+				SetupEMP(connection);
+
+				try {
+				
+					// Create select command...;
+					OracleCommand command = connection.CreateCommand();
+					command.CommandText = "SELECT * FROM EMP";
+
+					// Create data adapter...
+					OracleDataAdapter adapter = new OracleDataAdapter(command);
+
+					// Create DataSet...
+					DataSet dataSet = new DataSet("EMP");
+
+					// Fill DataSet via data adapter...
+					adapter.Fill(dataSet);
+
+					// Get DataTable...
+					DataTable table = dataSet.Tables[0];
+
+					// Display each row...
+					int rowCount = 0;
+					foreach(DataRow row in table.Rows){
+						for(int i = 0; i < table.Columns.Count; i += 1){
+							string s = string.Format("      {0}: {1}", table.Columns[i].ColumnName, row[i]);
+						}
+						rowCount += 1;
+					}
+					Assert.True(rowCount == table.Rows.Count, string.Format("  ROWS: {0}", table.Rows.Count));
+				}
+				catch(Exception ex){
+					Assert.True(false, ex.Message);
+				}
+			}
+			
 		}
 
 
@@ -721,54 +856,26 @@ namespace dotNetCore.Data.OracleClient.test
 
 /*
 
-		static void DataAdapterTest (OracleConnection connection)
+		
+
+		public static void DataAdapterTest2(OracleConnection con) 
 		{
-			Console.WriteLine("  Create select command...");
-			OracleCommand command = connection.CreateCommand ();
-			command.CommandText = "SELECT * FROM SYSTEM.EMP";
+			DataAdapterTest2_Setup(con);
+			ReadSimpleTest(con, "SELECT * FROM mono_adapter_test");
+		
+			GetMetaData(con, "SELECT * FROM mono_adapter_test");
 
-			Console.WriteLine("  Create data adapter...");
-			OracleDataAdapter adapter = new OracleDataAdapter (command);
+			DataAdapterTest2_Insert(con);
+			ReadSimpleTest(con, "SELECT * FROM mono_adapter_test");
+		
+			DataAdapterTest2_Update(con);
+			ReadSimpleTest(con, "SELECT * FROM mono_adapter_test");
 
-			Console.WriteLine("  Create DataSet...");
-			DataSet dataSet = new DataSet ("EMP");
-
-			Console.WriteLine("  Fill DataSet via data adapter...");
-			adapter.Fill (dataSet);
-
-			Console.WriteLine("  Get DataTable...");
-			DataTable table = dataSet.Tables [0];
-
-			Console.WriteLine("  Display each row...");
-			int rowCount = 0;
-			foreach (DataRow row in table.Rows) {
-				Console.WriteLine ("    row {0}", rowCount + 1);
-				for (int i = 0; i < table.Columns.Count; i += 1) {
-					Console.WriteLine ("      {0}: {1}", table.Columns [i].ColumnName, row [i]);
-				}
-				Console.WriteLine ();
-				rowCount += 1;
-			}
+			DataAdapterTest2_Delete(con);
+			ReadSimpleTest(con, "SELECT * FROM mono_adapter_test");
 		}
 
-		public static void DataAdapterTest2 (OracleConnection con) 
-		{
-			DataAdapterTest2_Setup (con);
-			ReadSimpleTest (con, "SELECT * FROM mono_adapter_test");
-		
-			GetMetaData (con, "SELECT * FROM mono_adapter_test");
-
-			DataAdapterTest2_Insert (con);
-			ReadSimpleTest (con, "SELECT * FROM mono_adapter_test");
-		
-			DataAdapterTest2_Update (con);
-			ReadSimpleTest (con, "SELECT * FROM mono_adapter_test");
-
-			DataAdapterTest2_Delete (con);
-			ReadSimpleTest (con, "SELECT * FROM mono_adapter_test");
-		}
-
-		public static void GetMetaData (OracleConnection con, string sql) 
+		public static void GetMetaData(OracleConnection con, string sql) 
 		{
 			OracleCommand cmd = null;
 			OracleDataReader rdr = null;
@@ -781,12 +888,12 @@ namespace dotNetCore.Data.OracleClient.test
 		
 			DataTable dt;
 			dt = rdr.GetSchemaTable();
-			foreach (DataRow schemaRow in dt.Rows) {
-				foreach (DataColumn schemaCol in dt.Columns) {
+			foreach(DataRow schemaRow in dt.Rows){
+				foreach(DataColumn schemaCol in dt.Columns){
 					Console.WriteLine(schemaCol.ColumnName + 
 						" = " + 
 						schemaRow[schemaCol]);
-					Console.WriteLine("---Type: " + schemaRow[schemaCol].GetType ().ToString());
+					Console.WriteLine("---Type: " + schemaRow[schemaCol].GetType().ToString());
 				}
 				Console.WriteLine("");
 			}
@@ -796,36 +903,36 @@ namespace dotNetCore.Data.OracleClient.test
 			rdr = cmd.ExecuteReader();
 
 			dt = rdr.GetSchemaTable();
-			foreach (DataRow schemaRow in dt.Rows) {
-				foreach (DataColumn schemaCol in dt.Columns) {
+			foreach(DataRow schemaRow in dt.Rows){
+				foreach(DataColumn schemaCol in dt.Columns){
 					Console.WriteLine(schemaCol.ColumnName + 
 						" = " + 
 						schemaRow[schemaCol]);
-					Console.WriteLine("---Type: " + schemaRow[schemaCol].GetType ().ToString());
+					Console.WriteLine("---Type: " + schemaRow[schemaCol].GetType().ToString());
 					Console.WriteLine();
 				}
 			}
 
 		}
 
-		public static void DataAdapterTest2_Setup (OracleConnection con) 
+		public static void DataAdapterTest2_Setup(OracleConnection con) 
 		{
-			Console.WriteLine ("  Drop table mono_adapter_test ...");
+			Console.WriteLine("  Drop table mono_adapter_test ...");
 			try {
-				OracleCommand cmd2 = con.CreateCommand ();
+				OracleCommand cmd2 = con.CreateCommand();
 				cmd2.CommandText = "DROP TABLE mono_adapter_test";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch (OracleException) {
+			catch(OracleException){
 				// ignore if table already exists
 			}
 
 			OracleCommand cmd = null;
 
 			Console.WriteLine("  Creating table mono_adapter_test...");
-			cmd = new OracleCommand ();
+			cmd = new OracleCommand();
 			cmd.Connection = con;
-			cmd.CommandText = "CREATE TABLE mono_adapter_test ( " +
+			cmd.CommandText = "CREATE TABLE mono_adapter_test( " +
 				" varchar2_value VarChar2(32),  " +
 				" number_whole_value Number(18) PRIMARY KEY, " +
 				" number_scaled_value Number(18,2), " +
@@ -839,14 +946,14 @@ namespace dotNetCore.Data.OracleClient.test
 			cmd.ExecuteNonQuery();
 
 			Console.WriteLine("  Begin Trans for table mono_adapter_test...");
-			OracleTransaction trans = con.BeginTransaction ();
+			OracleTransaction trans = con.BeginTransaction();
 
 			Console.WriteLine("  Inserting value into mono_adapter_test...");
 			cmd = new OracleCommand();
 			cmd.Connection = con;
 			cmd.Transaction = trans;
             cmd.CommandText = "INSERT INTO mono_adapter_test " +
-                " ( varchar2_value,  " +
+                "( varchar2_value,  " +
                 "  number_whole_value, " +
                 "  number_scaled_value, " +
                 "  number_integer_value, " +
@@ -872,41 +979,41 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("  Select/Update CLOB columns on table mono_adapter_test...");
 		
 			// update BLOB and CLOB columns
-			OracleCommand select = con.CreateCommand ();
+			OracleCommand select = con.CreateCommand();
 			select.Transaction = trans;
 			select.CommandText = "SELECT CLOB_VALUE, BLOB_VALUE FROM mono_adapter_test FOR UPDATE";
-			OracleDataReader reader = select.ExecuteReader ();
-			if (!reader.Read ())
-				Console.WriteLine ("ERROR: RECORD NOT FOUND");
+			OracleDataReader reader = select.ExecuteReader();
+			if(!reader.Read())
+				Console.WriteLine("ERROR: RECORD NOT FOUND");
 		
 			// update clob_value
 			Console.WriteLine("     Update CLOB column on table mono_adapter_test...");
-			OracleLob clob = reader.GetOracleLob (0);
+			OracleLob clob = reader.GetOracleLob(0);
 			byte[] bytes = null;
-			UnicodeEncoding encoding = new UnicodeEncoding ();
-			bytes = encoding.GetBytes ("Mono is fun!");
-			clob.Write (bytes, 0, bytes.Length);
-			clob.Close ();
+			UnicodeEncoding encoding = new UnicodeEncoding();
+			bytes = encoding.GetBytes("Mono is fun!");
+			clob.Write(bytes, 0, bytes.Length);
+			clob.Close();
 		
 			// update blob_value
 			Console.WriteLine("     Update BLOB column on table mono_adapter_test...");
-			OracleLob blob = reader.GetOracleLob (1);
+			OracleLob blob = reader.GetOracleLob(1);
 			bytes = new byte[6] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x036 };
-			blob.Write (bytes, 0, bytes.Length);
-			blob.Close ();
+			blob.Write(bytes, 0, bytes.Length);
+			blob.Close();
 			
 			Console.WriteLine("  Commit trans for table mono_adapter_test...");
-			trans.Commit ();
+			trans.Commit();
 
-			CommitCursor (con);
+			CommitCursor(con);
 		}
 
-		public static void DataAdapterTest2_Insert (OracleConnection con) 
+		public static void DataAdapterTest2_Insert(OracleConnection con) 
 		{
 			Console.WriteLine("================================");
 			Console.WriteLine("=== Adapter Insert =============");
 			Console.WriteLine("================================");
-			OracleTransaction transaction = con.BeginTransaction ();
+			OracleTransaction transaction = con.BeginTransaction();
 		
 			Console.WriteLine("   Create adapter...");
 			OracleDataAdapter da = new OracleDataAdapter("select * from mono_adapter_test", con);
@@ -951,16 +1058,16 @@ namespace dotNetCore.Data.OracleClient.test
 			mycb = null;
 		}
 
-		public static void DataAdapterTest2_Update (OracleConnection con) 
+		public static void DataAdapterTest2_Update(OracleConnection con) 
 		{
 			Console.WriteLine("================================");
 			Console.WriteLine("=== Adapter Update =============");
 			Console.WriteLine("================================");
 
-			OracleTransaction transaction = con.BeginTransaction ();
+			OracleTransaction transaction = con.BeginTransaction();
 
 			Console.WriteLine("   Create adapter...");
-			OracleCommand selectCmd = con.CreateCommand ();
+			OracleCommand selectCmd = con.CreateCommand();
 			selectCmd.Transaction = transaction;
 			selectCmd.CommandText = "SELECT * FROM mono_adapter_test";
 			OracleDataAdapter da = new OracleDataAdapter(selectCmd);
@@ -1009,12 +1116,12 @@ namespace dotNetCore.Data.OracleClient.test
 			mycb = null;
 		}
 
-		public static void DataAdapterTest2_Delete (OracleConnection con) 
+		public static void DataAdapterTest2_Delete(OracleConnection con) 
 		{
 			Console.WriteLine("================================");
 			Console.WriteLine("=== Adapter Delete =============");
 			Console.WriteLine("================================");
-			OracleTransaction transaction = con.BeginTransaction ();
+			OracleTransaction transaction = con.BeginTransaction();
 		
 			Console.WriteLine("   Create adapter...");
 			OracleDataAdapter da = new OracleDataAdapter("SELECT * FROM mono_adapter_test", con);
@@ -1062,13 +1169,13 @@ namespace dotNetCore.Data.OracleClient.test
 				Console.WriteLine("   RowsAffected after close: " + reader.RecordsAffected.ToString());
 				trans.Commit();
 			}
-			catch(OracleException e) {
+			catch(OracleException e){
 				Console.WriteLine("   OracleException caught: " + e.Message);
 				trans.Commit();
 			}
 
 			Console.WriteLine("   Create table mono_adapter_test...");
-			cmd.CommandText = "CREATE TABLE MONO_ADAPTER_TEST ( " +
+			cmd.CommandText = "CREATE TABLE MONO_ADAPTER_TEST( " +
 				" varchar2_value VarChar2(32),  " +
 				" number_whole_value Number(18,0) PRIMARY KEY ) ";
 			trans = con.BeginTransaction();
@@ -1102,8 +1209,8 @@ namespace dotNetCore.Data.OracleClient.test
 			myParameter2.Value = 182;
 			myParameter1.Value = "Mono";
 
-			cmd2.Parameters.Add (myParameter1);
-			cmd2.Parameters.Add (myParameter2);
+			cmd2.Parameters.Add(myParameter1);
+			cmd2.Parameters.Add(myParameter2);
 			
 			// insert 1 record
 			reader = cmd2.ExecuteReader();
@@ -1130,98 +1237,98 @@ namespace dotNetCore.Data.OracleClient.test
 			ReadSimpleTest(con, "SELECT * FROM MONO_ADAPTER_TEST");
 		}
 
-		static void CommitCursor (OracleConnection con) 
+		static void CommitCursor(OracleConnection con) 
 		{
-			OracleCommand cmd = con.CreateCommand ();
+			OracleCommand cmd = con.CreateCommand();
 			cmd.CommandText = "COMMIT";
-			cmd.ExecuteNonQuery ();
-			cmd.Dispose ();
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 			cmd = null;
 		}
 
-		static void RollbackTest (OracleConnection connection)
+		static void RollbackTest(OracleConnection connection)
 		{
-			OracleTransaction transaction = connection.BeginTransaction ();
+			OracleTransaction transaction = connection.BeginTransaction();
 
-			OracleCommand insert = connection.CreateCommand ();
+			OracleCommand insert = connection.CreateCommand();
 			insert.Transaction = transaction;
-			insert.CommandText = "INSERT INTO SYSTEM.EMP (EMPNO, ENAME, JOB) VALUES (8787, 'T Coleman', 'Monoist')";
+			insert.CommandText = "INSERT INTO SYSTEM.EMP(EMPNO, ENAME, JOB) VALUES(8787, 'T Coleman', 'Monoist')";
 
-			Console.WriteLine ("  Inserting record ...");
+			Console.WriteLine("  Inserting record ...");
 
-			insert.ExecuteNonQuery ();
+			insert.ExecuteNonQuery();
 
-			OracleCommand select = connection.CreateCommand ();
+			OracleCommand select = connection.CreateCommand();
 			select.CommandText = "SELECT COUNT(*) FROM SYSTEM.EMP WHERE EMPNO = 8787";
 			select.Transaction = transaction;
-			OracleDataReader reader = select.ExecuteReader ();
-			reader.Read ();
+			OracleDataReader reader = select.ExecuteReader();
+			reader.Read();
 
-			Console.WriteLine ("  Row count SHOULD BE 1, VALUE IS {0}", reader.GetValue (0));
-			reader.Close ();
+			Console.WriteLine("  Row count SHOULD BE 1, VALUE IS {0}", reader.GetValue(0));
+			reader.Close();
 
-			Console.WriteLine ("  Rolling back transaction ...");
+			Console.WriteLine("  Rolling back transaction ...");
 
-			transaction.Rollback ();
+			transaction.Rollback();
 
-			select = connection.CreateCommand ();
+			select = connection.CreateCommand();
 			select.CommandText = "SELECT COUNT(*) FROM SYSTEM.EMP WHERE EMPNO = 8787";
 
-			reader = select.ExecuteReader ();
-			reader.Read ();
-			Console.WriteLine ("  Row count SHOULD BE 0, VALUE IS {0}", reader.GetValue (0));
-			reader.Close ();
+			reader = select.ExecuteReader();
+			reader.Read();
+			Console.WriteLine("  Row count SHOULD BE 0, VALUE IS {0}", reader.GetValue(0));
+			reader.Close();
 		}
 		
-		static void CommitTest (OracleConnection connection)
+		static void CommitTest(OracleConnection connection)
 		{
-			OracleTransaction transaction = connection.BeginTransaction ();
+			OracleTransaction transaction = connection.BeginTransaction();
 
-			OracleCommand insert = connection.CreateCommand ();
+			OracleCommand insert = connection.CreateCommand();
 			insert.Transaction = transaction;
-			insert.CommandText = "INSERT INTO SYSTEM.EMP (EMPNO, ENAME, JOB) VALUES (8787, 'T Coleman', 'Monoist')";
+			insert.CommandText = "INSERT INTO SYSTEM.EMP(EMPNO, ENAME, JOB) VALUES(8787, 'T Coleman', 'Monoist')";
 
-			Console.WriteLine ("  Inserting record ...");
+			Console.WriteLine("  Inserting record ...");
 
-			insert.ExecuteNonQuery ();
+			insert.ExecuteNonQuery();
 
-			OracleCommand select = connection.CreateCommand ();
+			OracleCommand select = connection.CreateCommand();
 			select.CommandText = "SELECT COUNT(*) FROM SYSTEM.EMP WHERE EMPNO = 8787";
 			select.Transaction = transaction;
 
-			Console.WriteLine ("  Row count SHOULD BE 1, VALUE IS {0}", select.ExecuteScalar ());
+			Console.WriteLine("  Row count SHOULD BE 1, VALUE IS {0}", select.ExecuteScalar());
 
-			Console.WriteLine ("  Committing transaction ...");
+			Console.WriteLine("  Committing transaction ...");
 
-			transaction.Commit ();
+			transaction.Commit();
 
-			select = connection.CreateCommand ();
+			select = connection.CreateCommand();
 			select.CommandText = "SELECT COUNT(*) FROM SYSTEM.EMP WHERE EMPNO = 8787";
 
-			Console.WriteLine ("Row count SHOULD BE 1, VALUE IS {0}", select.ExecuteScalar ());
-			transaction = connection.BeginTransaction ();
-			OracleCommand delete = connection.CreateCommand ();
+			Console.WriteLine("Row count SHOULD BE 1, VALUE IS {0}", select.ExecuteScalar());
+			transaction = connection.BeginTransaction();
+			OracleCommand delete = connection.CreateCommand();
 			delete.Transaction = transaction;
 			delete.CommandText = "DELETE FROM SYSTEM.EMP WHERE EMPNO = 8787";
-			delete.ExecuteNonQuery ();
-			transaction.Commit ();
+			delete.ExecuteNonQuery();
+			transaction.Commit();
 		}
 
-		public static void ParameterTest2 (OracleConnection connection)
+		public static void ParameterTest2(OracleConnection connection)
 		{
 			Console.WriteLine("  Setting NLS_DATE_FORMAT...");
 
 			OracleCommand cmd2 = connection.CreateCommand();
 			cmd2.CommandText = "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'";
 		
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  Drop table MONO_TEST_TABLE2...");
 			try {
 				cmd2.CommandText = "DROP TABLE MONO_TEST_TABLE7";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if table already exists
 			}
 
@@ -1239,16 +1346,16 @@ namespace dotNetCore.Data.OracleClient.test
 				" COL9 CLOB NOT NULL, " +
 				" COL10 CLOB " +
 				")";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  COMMIT...");
 			cmd2.CommandText = "COMMIT";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  create insert command...");
 
-			OracleTransaction trans = connection.BeginTransaction ();
-			OracleCommand cmd = connection.CreateCommand ();
+			OracleTransaction trans = connection.BeginTransaction();
+			OracleCommand cmd = connection.CreateCommand();
 			cmd.Transaction = trans;
 
 			cmd.CommandText = "INSERT INTO MONO_TEST_TABLE7 " + 
@@ -1257,22 +1364,22 @@ namespace dotNetCore.Data.OracleClient.test
 		
 			Console.WriteLine("  Add parameters...");
 
-			OracleParameter parm1 = cmd.Parameters.Add (":P1", OracleType.VarChar, 8);
-			OracleParameter parm2 = cmd.Parameters.Add (":P2", OracleType.VarChar, 32);
+			OracleParameter parm1 = cmd.Parameters.Add(":P1", OracleType.VarChar, 8);
+			OracleParameter parm2 = cmd.Parameters.Add(":P2", OracleType.VarChar, 32);
 		
-			OracleParameter parm3 = cmd.Parameters.Add (":P3", OracleType.Number);
-			OracleParameter parm4 = cmd.Parameters.Add (":P4", OracleType.Number);
+			OracleParameter parm3 = cmd.Parameters.Add(":P3", OracleType.Number);
+			OracleParameter parm4 = cmd.Parameters.Add(":P4", OracleType.Number);
 		
-			OracleParameter parm5 = cmd.Parameters.Add (":P5", OracleType.DateTime);
-			OracleParameter parm6 = cmd.Parameters.Add (":P6", OracleType.DateTime);
+			OracleParameter parm5 = cmd.Parameters.Add(":P5", OracleType.DateTime);
+			OracleParameter parm6 = cmd.Parameters.Add(":P6", OracleType.DateTime);
 
 			// FIXME: fix BLOBs and CLOBs in OracleParameter
 
-			OracleParameter parm7 = cmd.Parameters.Add (":P7", OracleType.Blob);
-			OracleParameter parm8 = cmd.Parameters.Add (":P8", OracleType.Blob);
+			OracleParameter parm7 = cmd.Parameters.Add(":P7", OracleType.Blob);
+			OracleParameter parm8 = cmd.Parameters.Add(":P8", OracleType.Blob);
 
-			OracleParameter parm9 = cmd.Parameters.Add (":P9", OracleType.Clob);
-			OracleParameter parm10 = cmd.Parameters.Add (":P10", OracleType.Clob);
+			OracleParameter parm9 = cmd.Parameters.Add(":P9", OracleType.Clob);
+			OracleParameter parm10 = cmd.Parameters.Add(":P10", OracleType.Clob);
 
 			// TODO: implement out, return, and ref parameters
 
@@ -1302,25 +1409,25 @@ namespace dotNetCore.Data.OracleClient.test
 		
 			Console.WriteLine("  ExecuteNonQuery...");
 
-			cmd.ExecuteNonQuery ();
+			cmd.ExecuteNonQuery();
 			trans.Commit();
 		}
 
-		public static void ParameterTest (OracleConnection connection) 
+		public static void ParameterTest(OracleConnection connection) 
 		{
 			Console.WriteLine("  Setting NLS_DATE_FORMAT...");
 
 			OracleCommand cmd2 = connection.CreateCommand();
 			cmd2.CommandText = "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'";
 		
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  Drop table MONO_TEST_TABLE2...");
 			try {
 				cmd2.CommandText = "DROP TABLE MONO_TEST_TABLE7";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if table already exists
 			}
 
@@ -1338,16 +1445,16 @@ namespace dotNetCore.Data.OracleClient.test
 				" COL9 CLOB NOT NULL, " +
 				" COL10 CLOB " +
 				")";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  COMMIT...");
 			cmd2.CommandText = "COMMIT";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  create insert command...");
 
-			OracleTransaction trans = connection.BeginTransaction ();
-			OracleCommand cmd = connection.CreateCommand ();
+			OracleTransaction trans = connection.BeginTransaction();
+			OracleCommand cmd = connection.CreateCommand();
 			cmd.Transaction = trans;
 
 			cmd.CommandText = "INSERT INTO MONO_TEST_TABLE7 " + 
@@ -1356,22 +1463,22 @@ namespace dotNetCore.Data.OracleClient.test
 		
 			Console.WriteLine("  Add parameters...");
 
-			OracleParameter parm1 = cmd.Parameters.Add (":P1", OracleType.VarChar, 8);
-			OracleParameter parm2 = cmd.Parameters.Add (":P2", OracleType.VarChar, 32);
+			OracleParameter parm1 = cmd.Parameters.Add(":P1", OracleType.VarChar, 8);
+			OracleParameter parm2 = cmd.Parameters.Add(":P2", OracleType.VarChar, 32);
 		
-			OracleParameter parm3 = cmd.Parameters.Add (":P3", OracleType.Number);
-			OracleParameter parm4 = cmd.Parameters.Add (":P4", OracleType.Number);
+			OracleParameter parm3 = cmd.Parameters.Add(":P3", OracleType.Number);
+			OracleParameter parm4 = cmd.Parameters.Add(":P4", OracleType.Number);
 		
-			OracleParameter parm5 = cmd.Parameters.Add (":P5", OracleType.DateTime);
-			OracleParameter parm6 = cmd.Parameters.Add (":P6", OracleType.DateTime);
+			OracleParameter parm5 = cmd.Parameters.Add(":P5", OracleType.DateTime);
+			OracleParameter parm6 = cmd.Parameters.Add(":P6", OracleType.DateTime);
 
 			// FIXME: fix BLOBs and CLOBs in OracleParameter
 
-			OracleParameter parm7 = cmd.Parameters.Add (":P7", OracleType.Blob);
-			OracleParameter parm8 = cmd.Parameters.Add (":P8", OracleType.Blob);
+			OracleParameter parm7 = cmd.Parameters.Add(":P7", OracleType.Blob);
+			OracleParameter parm8 = cmd.Parameters.Add(":P8", OracleType.Blob);
 
-			OracleParameter parm9 = cmd.Parameters.Add (":P9", OracleType.Clob);
-			OracleParameter parm10 = cmd.Parameters.Add (":P10", OracleType.Clob);
+			OracleParameter parm9 = cmd.Parameters.Add(":P9", OracleType.Clob);
+			OracleParameter parm10 = cmd.Parameters.Add(":P10", OracleType.Clob);
 
 			// TODO: implement out, return, and ref parameters
 
@@ -1401,115 +1508,115 @@ namespace dotNetCore.Data.OracleClient.test
 		
 			Console.WriteLine("  ExecuteNonQuery...");
 
-			cmd.ExecuteNonQuery ();
+			cmd.ExecuteNonQuery();
 			trans.Commit();
 		}
 
 		static void Wait(string msg) 
 		{
 			Console.WriteLine(msg);
-			if (msg.Equals(""))
+			if(msg.Equals(""))
 				Console.WriteLine("Waiting...  Press Enter to continue...");
 			Console.ReadLine();
 		}
 
-		static void StoredProcedureTest1 (OracleConnection con) 
+		static void StoredProcedureTest1(OracleConnection con) 
 		{
 			// test stored procedure with no parameters
 			
 			
-			OracleCommand cmd2 = con.CreateCommand ();
+			OracleCommand cmd2 = con.CreateCommand();
 
 			Console.WriteLine("  Drop table MONO_TEST_TABLE1...");
 			try {
 				cmd2.CommandText = "DROP TABLE MONO_TEST_TABLE1";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if table did not exist
 			}
 
 			Console.WriteLine("  Drop procedure SP_TEST1...");
 			try {
 				cmd2.CommandText = "DROP PROCEDURE SP_TEST1";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if procedure did not exist
 			}
 
 			Console.WriteLine("  Create table MONO_TEST_TABLE1...");
-			cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE1 (" +
+			cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE1(" +
 					" COL1 VARCHAR2(8), "+
 					" COL2 VARCHAR2(32))";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 			
 			Console.WriteLine("  Create stored procedure SP_TEST1...");
 			cmd2.CommandText = "CREATE PROCEDURE SP_TEST1 " +
 				" IS " +
 				" BEGIN " +
-				"	INSERT INTO MONO_TEST_TABLE1 (COL1,COL2) VALUES ('aaa','bbbb');" +
+				"	INSERT INTO MONO_TEST_TABLE1(COL1,COL2) VALUES('aaa','bbbb');" +
 				"	COMMIT;" +
 				" END;";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("COMMIT...");
 			cmd2.CommandText = "COMMIT";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  Call stored procedure sp_test1...");
-			OracleCommand cmd3 = con.CreateCommand ();
+			OracleCommand cmd3 = con.CreateCommand();
 			cmd3.CommandType = CommandType.StoredProcedure;
 			cmd3.CommandText = "sp_test1";
-			cmd3.ExecuteNonQuery ();
+			cmd3.ExecuteNonQuery();
 		}
 
-		static void StoredProcedureTest2 (OracleConnection con) 
+		static void StoredProcedureTest2(OracleConnection con) 
 		{
 			// test stored procedure with 2 parameters
 
 			Console.WriteLine("  Drop table MONO_TEST_TABLE2...");
-			OracleCommand cmd2 = con.CreateCommand ();
+			OracleCommand cmd2 = con.CreateCommand();
 
 			try {
 				cmd2.CommandText = "DROP TABLE MONO_TEST_TABLE2";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if table already exists
 			}
 
 			Console.WriteLine("  Drop procedure SP_TEST2...");
 			try {
 				cmd2.CommandText = "DROP PROCEDURE SP_TEST2";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if procedure does not exist
 			}
 
 			Console.WriteLine("  Create table MONO_TEST_TABLE2...");
 						
-			cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE2 (" +
+			cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE2(" +
 				" COL1 VARCHAR2(8), "+
 				" COL2 VARCHAR2(32))";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 			
 			Console.WriteLine("  Create stored procedure SP_TEST2...");
 			cmd2.CommandText = "CREATE PROCEDURE SP_TEST2(parm1 VARCHAR2,parm2 VARCHAR2) " +
 				" IS " +
 				" BEGIN " +
-				"	INSERT INTO MONO_TEST_TABLE2 (COL1,COL2) VALUES (parm1,parm2);" +
+				"	INSERT INTO MONO_TEST_TABLE2(COL1,COL2) VALUES(parm1,parm2);" +
 				"	COMMIT;" +
 				" END;";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  COMMIT...");
 			cmd2.CommandText = "COMMIT";
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  Call stored procedure SP_TEST2 with two parameters...");
-			OracleCommand cmd3 = con.CreateCommand ();
+			OracleCommand cmd3 = con.CreateCommand();
 			cmd3.CommandType = CommandType.StoredProcedure;
 			cmd3.CommandText = "sp_test2";
 
@@ -1523,10 +1630,10 @@ namespace dotNetCore.Data.OracleClient.test
 			myParameter2.Size = 32;
 			myParameter2.Direction = ParameterDirection.Input;
 
-			cmd3.Parameters.Add (myParameter1);
-			cmd3.Parameters.Add (myParameter2);
+			cmd3.Parameters.Add(myParameter1);
+			cmd3.Parameters.Add(myParameter2);
 
-			cmd3.ExecuteNonQuery ();
+			cmd3.ExecuteNonQuery();
 		}
 
 		static void OutParmTest1(OracleConnection con)
@@ -1630,7 +1737,7 @@ namespace dotNetCore.Data.OracleClient.test
 		    myParameter1.Value = "999";
 		    myParameter3.Value = "Bye";
 		    cmd3.ExecuteNonQuery();
-		    if (myParameter2.Value == DBNull.Value)
+		    if(myParameter2.Value == DBNull.Value)
 		        outValue = "Value is DBNull.Value";
 		    else
 		        outValue = (string)myParameter2.Value;
@@ -1638,7 +1745,7 @@ namespace dotNetCore.Data.OracleClient.test
 		        inOutValue = "Value is DBNull.Value";
 		    else
 		        inOutValue = (string)myParameter3.Value;
-		    if (myParameter4.Value == DBNull.Value)
+		    if(myParameter4.Value == DBNull.Value)
 		        returnValue = "Value is DBNull.Value";
 		    else
 		        returnValue = (string)myParameter4.Value;
@@ -1665,13 +1772,13 @@ namespace dotNetCore.Data.OracleClient.test
 		    Console.WriteLine();
 		}
 
-		static void OutParmTest2 (OracleConnection con) 
+		static void OutParmTest2(OracleConnection con) 
 		{
 		    // test stored function with 4 parameters
 		    // 1. input number(18,2)
 		    // 2. output number(18,2)
-		    // 3. input output number (18,2)
-		    // 4. return number (18,2)
+		    // 3. input output number(18,2)
+		    // 4. return number(18,2)
 
 		    Console.WriteLine("  Create stored function SF_TESTOUTPARM2 to test NUMBER parameters...");
 
@@ -1764,15 +1871,15 @@ namespace dotNetCore.Data.OracleClient.test
 		    myParameter1.Value = 999;
 		    myParameter3.Value = 66;
 		    cmd3.ExecuteNonQuery();
-		    if (myParameter2.Value == DBNull.Value)
+		    if(myParameter2.Value == DBNull.Value)
 		        soutValue = "DBNull.Value";
 		    else
 		        soutValue = myParameter2.Value.ToString();
-		    if (myParameter3.Value == DBNull.Value)
+		    if(myParameter3.Value == DBNull.Value)
 		        sinOutValue = "DBNull.Value";
 		    else
 		        sinOutValue = myParameter3.Value.ToString();
-		    if (myParameter4.Value == DBNull.Value)
+		    if(myParameter4.Value == DBNull.Value)
 		        sreturnValue = "DBNull.Value";
 		    else
 		        sreturnValue = myParameter4.Value.ToString();
@@ -1790,7 +1897,7 @@ namespace dotNetCore.Data.OracleClient.test
 		    outValue = (decimal)myParameter2.Value;
 		    inOutValue = (decimal)myParameter3.Value;
 		    returnValue = (decimal)myParameter4.Value;
-		    Console.WriteLine("    4Out Value should be: 0 (as in digit zero)");
+		    Console.WriteLine("    4Out Value should be: 0(as in digit zero)");
 		    Console.WriteLine("    4Out Value: {0}", outValue);
 		    Console.WriteLine("    4InOut Value should be: 1234567890123.12345678");
 		    Console.WriteLine("    4InOut Value: {0}", inOutValue);
@@ -1800,7 +1907,7 @@ namespace dotNetCore.Data.OracleClient.test
 
 		}
 
-		static void OutParmTest3 (OracleConnection con) 
+		static void OutParmTest3(OracleConnection con) 
 		{
 		    // test stored function with 4 parameters
 		    // 1. input date
@@ -1900,19 +2007,19 @@ namespace dotNetCore.Data.OracleClient.test
 		    string soutValue = "";
 		    string sinOutValue = "";
 		    string sreturnValue = "";
-		    if (myParameter2.Value == DBNull.Value) 
+		    if(myParameter2.Value == DBNull.Value) 
 		        soutValue = "DBNull.Value";
 		    else {
 		        outValue = (DateTime)myParameter2.Value;
 		        soutValue = outValue.ToString("yyyy-MM-dd HH:mm:ss");
 		    }
-		    if (myParameter3.Value == DBNull.Value) 
+		    if(myParameter3.Value == DBNull.Value) 
 		        sinOutValue = "DBNull.Value";
 		    else {
 		        inOutValue = (DateTime)myParameter3.Value;
 		        sinOutValue = inOutValue.ToString("yyyy-MM-dd HH:mm:ss");
 		    }
-		    if (myParameter4.Value == DBNull.Value) 
+		    if(myParameter4.Value == DBNull.Value) 
 		        sreturnValue = "DBNull.Value";
 		    else {
 		        returnValue = (DateTime)myParameter4.Value;
@@ -2044,15 +2151,15 @@ namespace dotNetCore.Data.OracleClient.test
 		    myParameter1.Value = "999";
 		    myParameter3.Value = "Bye";
 		    cmd3.ExecuteNonQuery();
-		    if (myParameter2.Value == DBNull.Value)
+		    if(myParameter2.Value == DBNull.Value)
 			outValue = "Value is DBNull.Value";
 		    else
 			outValue = (string)myParameter2.Value;
-		    if (myParameter3.Value == DBNull.Value)
+		    if(myParameter3.Value == DBNull.Value)
 			inOutValue = "Value is DBNullValue";
 		    else
 			inOutValue = (string)myParameter3.Value;
-		    if (myParameter4.Value == DBNull.Value)
+		    if(myParameter4.Value == DBNull.Value)
 			returnValue = "Value is DBNull.Value";
 		    else
 			returnValue = (string)myParameter4.Value;
@@ -2267,34 +2374,34 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine();		
 		}
 
-		public static string GetOracleClobValue (OracleParameter parm)
+		public static string GetOracleClobValue(OracleParameter parm)
 		{
-			if (parm.Value.Equals (DBNull.Value))
+			if(parm.Value.Equals(DBNull.Value))
 				return "Clob is DBNull.Value";
 			OracleLob lob = (OracleLob) parm.Value;
-			if (lob.Length == 0)
+			if(lob.Length == 0)
 				return "Zero Length";
-			return lob.Value.ToString ();
+			return lob.Value.ToString();
 		}
 
-		public static OracleLob CreateTemporaryLobLocator (OracleCommand cmd, OracleType lobType)
+		public static OracleLob CreateTemporaryLobLocator(OracleCommand cmd, OracleType lobType)
 		{
 			cmd.CommandText =
-				"DECLARE TEMP_LOB " + lobType.ToString () + "; " +
+				"DECLARE TEMP_LOB " + lobType.ToString() + "; " +
 				"   BEGIN " +
-				"       SYS.DBMS_LOB.CREATETEMPORARY (TEMP_LOB, FALSE); " +
+				"       SYS.DBMS_LOB.CREATETEMPORARY(TEMP_LOB, FALSE); " +
 				"       :TempLobLocator := TEMP_LOB; " +
 				" END;";
 
-			OracleParameter parm = cmd.Parameters.Add ("TempLobLocator", lobType);
+			OracleParameter parm = cmd.Parameters.Add("TempLobLocator", lobType);
 			parm.Direction = ParameterDirection.Output;
 
-			cmd.ExecuteNonQuery ();
+			cmd.ExecuteNonQuery();
 
-			return (OracleLob)parm.Value;
+			return(OracleLob)parm.Value;
 		}
 
-		static void OutParmTest6 (OracleConnection con) 
+		static void OutParmTest6(OracleConnection con) 
 		{
 		    // test stored function with 4 parameters
 		    // 1. input timestamp
@@ -2394,19 +2501,19 @@ namespace dotNetCore.Data.OracleClient.test
 		    string soutValue = "";
 		    string sinOutValue = "";
 		    string sreturnValue = "";
-		    if (myParameter2.Value == DBNull.Value) 
+		    if(myParameter2.Value == DBNull.Value) 
 		        soutValue = "DBNull.Value";
 		    else {
 		        outValue = (DateTime)myParameter2.Value;
 		        soutValue = outValue.ToString("yyyy-MM-dd HH:mm:ss");
 		    }
-		    if (myParameter3.Value == DBNull.Value) 
+		    if(myParameter3.Value == DBNull.Value) 
 		        sinOutValue = "DBNull.Value";
 		    else {
 		        inOutValue = (DateTime)myParameter3.Value;
 		        sinOutValue = inOutValue.ToString("yyyy-MM-dd HH:mm:ss");
 		    }
-		    if (myParameter4.Value == DBNull.Value) 
+		    if(myParameter4.Value == DBNull.Value) 
 		        sreturnValue = "DBNull.Value";
 		    else {
 		        returnValue = (DateTime)myParameter4.Value;
@@ -2436,58 +2543,58 @@ namespace dotNetCore.Data.OracleClient.test
 
 		}
 
-		static void NullAggregateTest (OracleConnection con)
+		static void NullAggregateTest(OracleConnection con)
 		{
 			Console.WriteLine("  Drop table MONO_TEST_TABLE3...");
-			OracleCommand cmd2 = con.CreateCommand ();
+			OracleCommand cmd2 = con.CreateCommand();
 
 			try {
 				cmd2.CommandText = "DROP TABLE MONO_TEST_TABLE3";
-				cmd2.ExecuteNonQuery ();
+				cmd2.ExecuteNonQuery();
 			}
-			catch(OracleException) {
+			catch(OracleException){
 				// ignore if table already exists
 			}
 
 			Console.WriteLine("  Create table MONO_TEST_TABLE3...");
 						
-			cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE3 (" +
+			cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE3(" +
 				" COL1 VARCHAR2(8), "+
 				" COL2 VARCHAR2(32))";
 
-			cmd2.ExecuteNonQuery ();
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  Insert some rows into table MONO_TEST_TABLE3...");
-			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3 (COL1, COL2) VALUES ('1','one')";
-			cmd2.ExecuteNonQuery ();
+			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3(COL1, COL2) VALUES('1','one')";
+			cmd2.ExecuteNonQuery();
 
-			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3 (COL1, COL2) VALUES ('1','uno')";
-			cmd2.ExecuteNonQuery ();
+			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3(COL1, COL2) VALUES('1','uno')";
+			cmd2.ExecuteNonQuery();
 			
-			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3 (COL1, COL2) VALUES ('3','three')";
-			cmd2.ExecuteNonQuery ();
+			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3(COL1, COL2) VALUES('3','three')";
+			cmd2.ExecuteNonQuery();
 			
-			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3 (COL1, COL2) VALUES ('3', null)";
-			cmd2.ExecuteNonQuery ();
+			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3(COL1, COL2) VALUES('3', null)";
+			cmd2.ExecuteNonQuery();
 
-			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3 (COL1, COL2) VALUES ('3','few')";
-			cmd2.ExecuteNonQuery ();
+			cmd2.CommandText = "INSERT INTO MONO_TEST_TABLE3(COL1, COL2) VALUES('3','few')";
+			cmd2.ExecuteNonQuery();
 
 			Console.WriteLine("  ExecuteScalar...");
 			cmd2.CommandText = "SELECT COL1, COUNT(COL2) AS MAX_COL1 FROM MONO_TEST_TABLE3 GROUP BY COL1";
-			OracleDataReader reader = cmd2.ExecuteReader ();
-			Console.WriteLine (" Read...");
-			while (reader.Read ()) {
+			OracleDataReader reader = cmd2.ExecuteReader();
+			Console.WriteLine(" Read...");
+			while(reader.Read()){
 
-				object obj0 = reader.GetValue (0);
-				Console.WriteLine("Value 0: " + obj0.ToString ());
-				object obj1 = reader.GetValue (1);
-				Console.WriteLine("Value 1: " + obj1.ToString ());
+				object obj0 = reader.GetValue(0);
+				Console.WriteLine("Value 0: " + obj0.ToString());
+				object obj1 = reader.GetValue(1);
+				Console.WriteLine("Value 1: " + obj1.ToString());
 			
-				Console.WriteLine (" Read...");
+				Console.WriteLine(" Read...");
 			}
 
-			Console.WriteLine (" No more records.");
+			Console.WriteLine(" No more records.");
 		}
 
 		static void RefCursorTests(OracleConnection con) 
@@ -2510,14 +2617,14 @@ namespace dotNetCore.Data.OracleClient.test
 			cmd.CommandText = 
 				"CREATE OR REPLACE PACKAGE curspkg_join AS\n" +
 				"TYPE t_cursor IS REF CURSOR;\n" +
-				"Procedure open_join_cursor1 (n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor);\n" +
+				"Procedure open_join_cursor1(n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor);\n" +
 				"END curspkg_join;";
 			cmd.ExecuteNonQuery();
 
 			Console.Error.WriteLine("    create or replace package body curspkg_join...");			
 			cmd.CommandText = 
 				"CREATE OR REPLACE PACKAGE BODY curspkg_join AS\n" +
-				"   Procedure open_join_cursor1 (n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)\n" +
+				"   Procedure open_join_cursor1(n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)\n" +
 				"   IS\n" +
 				"        v_cursor t_cursor;\n" +
 				"   BEGIN\n" +
@@ -2553,7 +2660,7 @@ namespace dotNetCore.Data.OracleClient.test
 			try { 
 				cmddrop.ExecuteNonQuery(); 
 			} 
-			catch(OracleException e) {
+			catch(OracleException e){
 				Console.WriteLine("Ignore this error: " + e.Message); 
 			}
 			cmddrop.Dispose();
@@ -2563,7 +2670,7 @@ namespace dotNetCore.Data.OracleClient.test
 
 			// create table TESTTABLE
 			cmd.CommandText = 
-				"create table TESTTABLE (\n" +
+				"create table TESTTABLE(\n" +
 				" col1 numeric(18,0),\n" +
 				" col2 char(32),\n" +
 				" col3 date)";
@@ -2632,9 +2739,9 @@ namespace dotNetCore.Data.OracleClient.test
 			
 			Console.WriteLine("Read data...");
 			int r = 0;
-			while (reader.Read()) {
+			while(reader.Read()){
 				Console.WriteLine("Row {0}", r);
-				for (int f = 0; f < reader.FieldCount; f ++) {
+				for(int f = 0; f < reader.FieldCount; f ++){
 					object val = reader.GetValue(f);
 					Console.WriteLine("    Field {0} Value: {1}", f, val.ToString());
 				}
@@ -2663,7 +2770,7 @@ namespace dotNetCore.Data.OracleClient.test
 				"END;";
 		
 			// PL/SQL definition of stored procedure in package curspkg_join
-			// open_join_cursor1 (n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)
+			// open_join_cursor1(n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)
 
 			Console.WriteLine("Create parameters...");
 
@@ -2686,15 +2793,15 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("Execute Non Query...");
 			cmd.ExecuteNonQuery();
 
-			Console.WriteLine("Get data reader (ref cursor) from out parameter...");
+			Console.WriteLine("Get data reader(ref cursor) from out parameter...");
 			reader = (OracleDataReader) cmd.Parameters["io_cursor"].Value;
 
 			int x, count;
 			count = 0;
 
 			Console.WriteLine("Get data from ref cursor...");
-			while (reader.Read()) {
-				for (x = 0; x < reader.FieldCount; x++) 
+			while(reader.Read()){
+				for(x = 0; x < reader.FieldCount; x++) 
 					Console.Write(reader[x] + " ");
 			
 				Console.WriteLine();
@@ -2715,7 +2822,7 @@ namespace dotNetCore.Data.OracleClient.test
 			cmd.CommandText = "call curspkg_join.open_join_cursor1(:n_Empno,:io_cursor)";
 		
 			// PL/SQL definition of stored procedure in package curspkg_join
-			// open_join_cursor1 (n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)
+			// open_join_cursor1(n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)
 
 			Console.WriteLine("Create parameters...");
 
@@ -2738,15 +2845,15 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("Execute Non Query...");
 			cmd.ExecuteNonQuery();
 
-			Console.WriteLine("Get data reader (ref cursor) from out parameter...");
+			Console.WriteLine("Get data reader(ref cursor) from out parameter...");
 			reader = (OracleDataReader) cmd.Parameters["io_cursor"].Value;
 
 			int x, count;
 			count = 0;
 
 			Console.WriteLine("Get data from ref cursor...");
-			while (reader.Read()) {
-				for (x = 0; x < reader.FieldCount; x++) 
+			while(reader.Read()){
+				for(x = 0; x < reader.FieldCount; x++) 
 					Console.Write(reader[x] + " ");
 			
 				Console.WriteLine();
@@ -2768,7 +2875,7 @@ namespace dotNetCore.Data.OracleClient.test
 			cmd.CommandType = CommandType.StoredProcedure;
 		
 			// PL/SQL definition of stored procedure in package curspkg_join
-			// open_join_cursor1 (n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)
+			// open_join_cursor1(n_EMPNO IN NUMBER, io_cursor IN OUT t_cursor)
 
 			Console.WriteLine("Create parameters...");
 
@@ -2791,15 +2898,15 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("Execute Non Query...");
 			cmd.ExecuteNonQuery();
 
-			Console.WriteLine("Get data reader (ref cursor) from out parameter...");
+			Console.WriteLine("Get data reader(ref cursor) from out parameter...");
 			reader = (OracleDataReader) cmd.Parameters["io_cursor"].Value;
 
 			int x, count;
 			count = 0;
 
 			Console.WriteLine("Get data from ref cursor...");
-			while (reader.Read()) {
-				for (x = 0; x < reader.FieldCount; x++) 
+			while(reader.Read()){
+				for(x = 0; x < reader.FieldCount; x++) 
 					Console.Write(reader[x] + " ");
 			
 				Console.WriteLine();
@@ -2810,10 +2917,10 @@ namespace dotNetCore.Data.OracleClient.test
 			reader.Close();
 		}
 
-		static void ExternalAuthenticationTest () 
+		static void ExternalAuthenticationTest() 
 		{
 			string user = Environment.UserName;
-			if (!Environment.UserDomainName.Equals(String.Empty))
+			if(!Environment.UserDomainName.Equals(String.Empty))
 				user = Environment.UserDomainName + "\\" + Environment.UserName;
 			Console.WriteLine("Environment UserDomainName and UserName: " + user);
 			Console.WriteLine("Open connection using external authentication...");
@@ -2823,11 +2930,11 @@ namespace dotNetCore.Data.OracleClient.test
 				OracleCommand cmd = con.CreateCommand();
 				cmd.CommandText = "SELECT USER FROM DUAL";
 				OracleDataReader reader = cmd.ExecuteReader();
-				if (reader.Read())
+				if(reader.Read())
 					Console.WriteLine("User: " + reader.GetString(reader.GetOrdinal("USER")));
 				con.Close();
 			}
-			catch (Exception e) {
+			catch(Exception e){
 				Console.WriteLine("Exception caught: " + e.Message);
 				Console.WriteLine("Probably not setup for external authentication.");
 			}
@@ -2893,7 +3000,7 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("ConnectionState for con: " + con.State.ToString() + "\n");
 		
 			Console.WriteLine("Clone OracleConnection...");
-			OracleConnection con2 = (OracleConnection) ((ICloneable) con).Clone();
+			OracleConnection con2 = (OracleConnection)((ICloneable) con).Clone();
 		
 			Console.WriteLine("ConnectionState for con2: " + con2.State.ToString());
 			Console.WriteLine("con2 ConnectionString before open: " + con2.ConnectionString);
@@ -2910,7 +3017,7 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("\nTestPersistSucurityInfo6 - external auth using persist security info");
 
 			string user = Environment.UserName;
-			if (!Environment.UserDomainName.Equals(String.Empty))
+			if(!Environment.UserDomainName.Equals(String.Empty))
 				user = Environment.UserDomainName + "\\" + Environment.UserName;
 			Console.WriteLine("Environment UserDomainName and UserName: " + user);
 			Console.WriteLine("Open connection using external authentication...");
@@ -2921,12 +3028,12 @@ namespace dotNetCore.Data.OracleClient.test
 				OracleCommand cmd = con.CreateCommand();
 				cmd.CommandText = "SELECT USER FROM DUAL";
 				OracleDataReader reader = cmd.ExecuteReader();
-				if (reader.Read())
+				if(reader.Read())
 					Console.WriteLine("User: " + reader.GetString(reader.GetOrdinal("USER")));
 				con.Close();
 				Console.WriteLine("ConnectionString after close: " + con.ConnectionString);
 			}
-			catch (Exception e) {
+			catch(Exception e){
 				Console.WriteLine("Exception caught: " + e.Message);
 				Console.WriteLine("Probably not setup for external authentication. This is fine.");
 			}
@@ -2936,7 +3043,7 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("\n\n");
 		}
 
-		public static void ConnectionPoolingTest1 () 
+		public static void ConnectionPoolingTest1() 
 		{
 			Console.WriteLine("Start Connection Pooling Test 1...");
 			OracleConnection[] connections = null;
@@ -2946,22 +3053,22 @@ namespace dotNetCore.Data.OracleClient.test
 			try {
 				connections = new OracleConnection[maxCon];			
 		
-				for (i = 0; i < maxCon; i++) {
+				for(i = 0; i < maxCon; i++){
 					Console.WriteLine("   Open connection: {0}", i);
 					connections[i] = new OracleConnection(conStr);
-					connections[i].Open ();
+					connections[i].Open();
 				}
-			} catch (InvalidOperationException e) {
+			} catch(InvalidOperationException e){
 				Console.WriteLine("Expected exception InvalidOperationException caught.");
 				Console.WriteLine(e);
 			}
 
-			for (i = 0; i < maxCon; i++) {
-				if (connections[i] != null) {
+			for(i = 0; i < maxCon; i++){
+				if(connections[i] != null){
 					Console.WriteLine("   Close connection: {0}", i);
-					if (connections[i].State == ConnectionState.Open)
-						connections[i].Close ();
-					connections[i].Dispose ();
+					if(connections[i].State == ConnectionState.Open)
+						connections[i].Close();
+					connections[i].Dispose();
 					connections[i] = null;
 				}
 			}
@@ -2971,7 +3078,7 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("Done Connection Pooling Test 1.");
 		}
 
-		public static void ConnectionPoolingTest2 () 
+		public static void ConnectionPoolingTest2() 
 		{
 			Console.WriteLine("Start Connection Pooling Test 2...");
 			OracleConnection[] connections = null;
@@ -2980,26 +3087,26 @@ namespace dotNetCore.Data.OracleClient.test
 
 			connections = new OracleConnection[maxCon];			
 		
-			for (i = 0; i < maxCon; i++) {
+			for(i = 0; i < maxCon; i++){
 				Console.WriteLine("   Open connection: {0}", i);
 				connections[i] = new OracleConnection(conStr);
-				connections[i].Open ();
+				connections[i].Open();
 			}
 		
 			Console.WriteLine("Start another thread...");
 			t = new Thread(new ThreadStart(AnotherThreadProc));
-			t.Start ();
+			t.Start();
 
 			Console.WriteLine("Sleep...");
 			Thread.Sleep(100);
 
 			Console.WriteLine("Closing...");
-			for (i = 0; i < maxCon; i++) {
-				if (connections[i] != null) {
+			for(i = 0; i < maxCon; i++){
+				if(connections[i] != null){
 					Console.WriteLine("   Close connection: {0}", i);
-					if (connections[i].State == ConnectionState.Open)
-						connections[i].Close ();
-					connections[i].Dispose ();
+					if(connections[i].State == ConnectionState.Open)
+						connections[i].Close();
+					connections[i].Dispose();
 					connections[i] = null;
 				}
 			}
@@ -3007,7 +3114,7 @@ namespace dotNetCore.Data.OracleClient.test
 			connections = null;
 		}
 
-		private static void AnotherThreadProc () 
+		private static void AnotherThreadProc() 
 		{
 			Console.WriteLine("Open connection via another thread...");
 			OracleConnection[] connections = null;
@@ -3016,49 +3123,49 @@ namespace dotNetCore.Data.OracleClient.test
 
 			connections = new OracleConnection[maxCon];			
 		
-			for (i = 0; i < maxCon; i++) {
+			for(i = 0; i < maxCon; i++){
 				Console.WriteLine("   Open connection: {0}", i);
 				connections[i] = new OracleConnection(conStr);
-				connections[i].Open ();
+				connections[i].Open();
 			}
 
 			Console.WriteLine("Done Connection Pooling Test 2.");
-			System.Environment.Exit (0);
+			System.Environment.Exit(0);
 		}
 
-		private static void SetParameterOracleType (OracleConnection con) 
+		private static void SetParameterOracleType(OracleConnection con) 
 		{
 			Console.WriteLine();
 			OracleParameter p = con.CreateCommand().CreateParameter();
-			Console.WriteLine("p.OracleType [VarChar]: " + p.OracleType.ToString());
+			Console.WriteLine("p.OracleType[VarChar]: " + p.OracleType.ToString());
 			p.OracleType = OracleType.Clob;
-			Console.WriteLine("p.OracleType [Clob]: " + p.OracleType.ToString());
+			Console.WriteLine("p.OracleType[Clob]: " + p.OracleType.ToString());
 			p.Value = "SomeString";
-			Console.WriteLine("p.OracleType [Clob]: " + p.OracleType.ToString());
+			Console.WriteLine("p.OracleType[Clob]: " + p.OracleType.ToString());
 			Console.WriteLine();
 
 			OracleParameter p2 = con.CreateCommand().CreateParameter();
-			Console.WriteLine("p2.OracleType [VarChar]: " + p2.OracleType.ToString());
+			Console.WriteLine("p2.OracleType[VarChar]: " + p2.OracleType.ToString());
 			p2.Value = new byte[] { 0x01, 0x02, 0x03, 0x04 };
-			Console.WriteLine("p2.OracleType [VarChar]: " + p2.OracleType.ToString());
+			Console.WriteLine("p2.OracleType[VarChar]: " + p2.OracleType.ToString());
 			p2.OracleType = OracleType.Blob;
-			Console.WriteLine("p2.OracleType [Blob]: " + p2.OracleType.ToString());
+			Console.WriteLine("p2.OracleType[Blob]: " + p2.OracleType.ToString());
 			Console.WriteLine();
 
 			OracleParameter p3 = new OracleParameter("test", OracleType.Clob);
-			Console.WriteLine("p3.OracleType [Clob]: " + p3.OracleType.ToString());
+			Console.WriteLine("p3.OracleType[Clob]: " + p3.OracleType.ToString());
 			p3.Value = "blah";
-			Console.WriteLine("p3.OracleType [Clob]: " + p3.OracleType.ToString());
+			Console.WriteLine("p3.OracleType[Clob]: " + p3.OracleType.ToString());
 			Console.WriteLine();
 
 			OracleParameter p4 = new OracleParameter("test", "blah");
-			Console.WriteLine("p4.OracleType [VarChar]: " + p4.OracleType.ToString());
+			Console.WriteLine("p4.OracleType[VarChar]: " + p4.OracleType.ToString());
 			p4.OracleType = OracleType.Clob;
-			Console.WriteLine("p4.OracleType [Clob]: " + p4.OracleType.ToString());
+			Console.WriteLine("p4.OracleType[Clob]: " + p4.OracleType.ToString());
 			Console.WriteLine();
 
-			OracleParameter p5 = new OracleParameter ((string) null, new DateTime (2005, 3, 8));
-			Console.WriteLine("p5.OracleType [DateTime]: " + p5.OracleType.ToString());
+			OracleParameter p5 = new OracleParameter((string) null, new DateTime(2005, 3, 8));
+			Console.WriteLine("p5.OracleType[DateTime]: " + p5.OracleType.ToString());
 		}
 
 		static void Main(string[] args) 
@@ -3074,136 +3181,136 @@ namespace dotNetCore.Data.OracleClient.test
 			OracleConnection con1 = new OracleConnection();
 
             /*
-			ShowConnectionProperties (con1);
+			ShowConnectionProperties(con1);
 
 			con1.ConnectionString = connectionString;
 
-			con1.InfoMessage += new OracleInfoMessageEventHandler (OnInfoMessage);
-			con1.StateChange += new StateChangeEventHandler (OnStateChange);
+			con1.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+			con1.StateChange += new StateChangeEventHandler(OnStateChange);
 
 			Console.WriteLine("Opening...");
-			con1.Open ();
+			con1.Open();
 			Console.WriteLine("Opened.");
 
-			ShowConnectionProperties (con1);
+			ShowConnectionProperties(con1);
 
-			InsertBlobTest (con1);
+			InsertBlobTest(con1);
 
-			Console.WriteLine ("Mono Oracle Test BEGIN ...");
-			MonoTest (con1);
-			Console.WriteLine ("Mono Oracle Test END ...");
+			Console.WriteLine("Mono Oracle Test BEGIN ...");
+			MonoTest(con1);
+			Console.WriteLine("Mono Oracle Test END ...");
 
-			Wait ("");
+			Wait("");
 			
-			Console.WriteLine ("LOB Test BEGIN...");
-			CLOBTest (con1);
-			BLOBTest (con1);
-			Console.WriteLine ("LOB Test END.");
-			Wait ("");
+			Console.WriteLine("LOB Test BEGIN...");
+			CLOBTest(con1);
+			BLOBTest(con1);
+			Console.WriteLine("LOB Test END.");
+			Wait("");
 
-			Console.WriteLine ("Read Simple Test BEGIN - SYSTEM.emp...");
+			Console.WriteLine("Read Simple Test BEGIN - SYSTEM.emp...");
                         ReadSimpleTest(con1, "SELECT e.*, e.rowid FROM SYSTEM.emp e");
-			Console.WriteLine ("Read Simple Test END - SYSTEM.emp");
+			Console.WriteLine("Read Simple Test END - SYSTEM.emp");
 
-			Wait ("");
+			Wait("");
 			
-			Console.WriteLine ("DataAdapter Test BEGIN...");
+			Console.WriteLine("DataAdapter Test BEGIN...");
                         DataAdapterTest(con1);
-			Console.WriteLine ("DataAdapter Test END.");
+			Console.WriteLine("DataAdapter Test END.");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("DataAdapter Test 2 BEGIN...");
+			Console.WriteLine("DataAdapter Test 2 BEGIN...");
 			// FIXME: test is failing in NET_2_0 profile but not in NET_1_1 profile
 			// Unhandled Exception: System.Data.OracleClient.OracleException: ORA-01400: cannot insert NULL 
-			// into ("SYSTEM"."MONO_ADAPTER_TEST"."NUMBER_WHOLE_VALUE")
+			// into("SYSTEM"."MONO_ADAPTER_TEST"."NUMBER_WHOLE_VALUE")
 			// NUMBER_WHOLE_VALUE is a primary key on the table.
 			//DataAdapterTest2(con1);
-			Console.WriteLine ("***DataAdapter Test 2 FAILS!");
-			Console.WriteLine ("DataAdapter Test 2 END.");
+			Console.WriteLine("***DataAdapter Test 2 FAILS!");
+			Console.WriteLine("DataAdapter Test 2 END.");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("Rollback Test BEGIN...");
+			Console.WriteLine("Rollback Test BEGIN...");
                         RollbackTest(con1);
-			Console.WriteLine ("Rollback Test END.");
+			Console.WriteLine("Rollback Test END.");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("Commit Test BEGIN...");
+			Console.WriteLine("Commit Test BEGIN...");
                         CommitTest(con1);
-			Console.WriteLine ("Commit Test END.");
+			Console.WriteLine("Commit Test END.");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("Parameter Test BEGIN...");
+			Console.WriteLine("Parameter Test BEGIN...");
                         ParameterTest(con1);
 			ReadSimpleTest(con1, "SELECT * FROM MONO_TEST_TABLE7");
-			Console.WriteLine ("Parameter Test END.");
+			Console.WriteLine("Parameter Test END.");
 
-			Wait ("");
+			Wait("");
 			
-			Console.WriteLine ("Stored Proc Test 1 BEGIN...");
-			StoredProcedureTest1 (con1);
+			Console.WriteLine("Stored Proc Test 1 BEGIN...");
+			StoredProcedureTest1(con1);
 			ReadSimpleTest(con1, "SELECT * FROM MONO_TEST_TABLE1");
-			Console.WriteLine ("Stored Proc Test 1 END...");
+			Console.WriteLine("Stored Proc Test 1 END...");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("Stored Proc Test 2 BEGIN...");
-			StoredProcedureTest2 (con1);
+			Console.WriteLine("Stored Proc Test 2 BEGIN...");
+			StoredProcedureTest2(con1);
 			ReadSimpleTest(con1, "SELECT * FROM MONO_TEST_TABLE2");
-			Console.WriteLine ("Stored Proc Test 2 END...");
+			Console.WriteLine("Stored Proc Test 2 END...");
 
-			SetParameterOracleType (con1);
+			SetParameterOracleType(con1);
 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 1 BEGIN...");
-			OutParmTest1 (con1); 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 1 END...");
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 1 BEGIN...");
+			OutParmTest1(con1); 
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 1 END...");
 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 2 BEGIN...");
-			OutParmTest2 (con1); 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 2 END...");
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 2 BEGIN...");
+			OutParmTest2(con1); 
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 2 END...");
 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 3 BEGIN...");
-			OutParmTest3 (con1); 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 3 END...");
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 3 BEGIN...");
+			OutParmTest3(con1); 
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 3 END...");
 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 4 BEGIN...");
-			OutParmTest4 (con1); 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 4 END...");
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 4 BEGIN...");
+			OutParmTest4(con1); 
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 4 END...");
 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 5 BEGIN...");
-			OutParmTest5 (con1); 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 5 END...");
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 5 BEGIN...");
+			OutParmTest5(con1); 
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 5 END...");
 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 6 BEGIN...");
-			OutParmTest6 (con1); 
-			Console.WriteLine ("Out Parameter and PL/SQL Block Test 6 END...");
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 6 BEGIN...");
+			OutParmTest6(con1); 
+			Console.WriteLine("Out Parameter and PL/SQL Block Test 6 END...");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("Test a Non Query using Execute Reader BEGIN...");
-			TestNonQueryUsingExecuteReader (con1);
-			Console.WriteLine ("Test a Non Query using Execute Reader END...");
+			Console.WriteLine("Test a Non Query using Execute Reader BEGIN...");
+			TestNonQueryUsingExecuteReader(con1);
+			Console.WriteLine("Test a Non Query using Execute Reader END...");
 
-			Wait ("");
+			Wait("");
 
-			Console.WriteLine ("Null Aggregate Warning BEGIN test...");
-			NullAggregateTest (con1);
-			Console.WriteLine ("Null Aggregate Warning END test...");
+			Console.WriteLine("Null Aggregate Warning BEGIN test...");
+			NullAggregateTest(con1);
+			Console.WriteLine("Null Aggregate Warning END test...");
 
-			Console.WriteLine ("Ref Cursor BEGIN tests...");
-			RefCursorTests (con1);
-			Console.WriteLine ("Ref Cursor END tests...");
+			Console.WriteLine("Ref Cursor BEGIN tests...");
+			RefCursorTests(con1);
+			Console.WriteLine("Ref Cursor END tests...");
 
 			Console.WriteLine("Closing...");
-			con1.Close ();
+			con1.Close();
 			Console.WriteLine("Closed.");
 
-			conStr = conStr + ";pooling=true;min pool size=4;max pool size=" + MAX_CONNECTIONS.ToString ();
-			ConnectionPoolingTest1 ();
-			ConnectionPoolingTest2 ();
+			conStr = conStr + ";pooling=true;min pool size=4;max pool size=" + MAX_CONNECTIONS.ToString();
+			ConnectionPoolingTest1();
+			ConnectionPoolingTest2();
 
 			// Need to have an external authentication user setup in Linux and oracle
 			// before running this test
@@ -3222,13 +3329,13 @@ namespace dotNetCore.Data.OracleClient.test
 
         */
 
-        // [Fact]
+        //[Fact]
         // public void InsertTable()
         // {
-        //     using (var connection = new OracleConnection("Data Source=XE;User ID=system;Password=oracle"))
+        //     using(var connection = new OracleConnection("Data Source=XE;User ID=system;Password=oracle"))
         //     {
         //         connection.Open();
-        //         using (var command = connection.CreateCommand())
+        //         using(var command = connection.CreateCommand())
         //         {
 
         //             command.Transaction = connection.BeginTransaction();
@@ -3255,19 +3362,19 @@ namespace dotNetCore.Data.OracleClient.test
 		// 	// myParameter2.Value = 182;
 		// 	// myParameter1.Value = "Mono";
 
-		// 	// cmd2.Parameters.Add (myParameter1);
-        //     // cmd2.Parameters.Add (myParameter2);
+		// 	// cmd2.Parameters.Add(myParameter1);
+        //     // cmd2.Parameters.Add(myParameter2);
 
 
 
                     
 
         //             Console.WriteLine("Execute reader...");
-        //             using (var reader = command.ExecuteReader())
+        //             using(var reader = command.ExecuteReader())
         //             {
         //                 Console.WriteLine("Tables:");
 
-        //                 while (reader.Read())
+        //                 while(reader.Read())
         //                 {
         //                     string tableName = reader.GetString(reader.GetOrdinal("TABLE_NAME"));
         //                     Console.WriteLine(tableName);
