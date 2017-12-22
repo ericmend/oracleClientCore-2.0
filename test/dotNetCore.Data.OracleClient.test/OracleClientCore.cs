@@ -14,7 +14,7 @@ namespace dotNetCore.Data.OracleClient.test
     /// </summary>
     public class OracleClientCore
     {
-		private const string dataSource = "XE";
+		private const string dataSource = "(DESCRIPTION = (ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 127.0.0.1)(PORT = 1521))) (CONNECT_DATA =(SID = XE)(SERVER = DEDICATED)))";
 		private const string userID = "SYSTEM";
 		private const string password = "oracle";
 
