@@ -170,14 +170,16 @@ namespace System.Data.OracleClient
 		override
 		bool GetBoolean (int i)
 		{
-			throw new NotSupportedException ();
+			IConvertible c = (IConvertible)GetValue(i);
+			return c.ToBoolean(CultureInfo.CurrentCulture);
 		}
 
 		public
 		override
 		byte GetByte (int i)
 		{
-			throw new NotSupportedException ();
+			IConvertible c = (IConvertible)GetValue(i);
+			return c.ToByte(CultureInfo.CurrentCulture);
 		}
 
 		public
@@ -202,7 +204,7 @@ namespace System.Data.OracleClient
 		override
 		char GetChar (int i)
 		{
-			throw new NotSupportedException ();
+			return (char)GetValue(i);
 		}
 
 		public
@@ -267,14 +269,15 @@ namespace System.Data.OracleClient
 		override
 		Guid GetGuid (int i)
 		{
-			throw new NotSupportedException ();
+			return new Guid(GetString(i));
 		}
 
 		public
 		override
 		short GetInt16 (int i)
 		{
-			throw new NotSupportedException ();
+			IConvertible c = (IConvertible) GetValue (i);
+			return c.ToInt16 (CultureInfo.CurrentCulture);
 		}
 
 		public
@@ -685,7 +688,11 @@ namespace System.Data.OracleClient
 		override
 		string GetString (int i)
 		{
-			return (string) GetValue (i);
+			object r = GetValue(i);
+			if (r == DBNull.Value)
+				return null;
+				
+			return (string)r;
 		}
 
 		public TimeSpan GetTimeSpan (int i)

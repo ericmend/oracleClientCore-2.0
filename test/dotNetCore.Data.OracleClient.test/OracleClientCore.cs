@@ -851,7 +851,218 @@ namespace dotNetCore.Data.OracleClient.test
 			
 		}
 
+		[Fact]
+		private void RollbackTest()
+		{
+			using(var connection = new OracleConnection(connectionString))
+            {
+				connection.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler(OnStateChange);
+				connection.Open();
+				
+				SetupEMP(connection);
+				OracleTransaction transaction = connection.BeginTransaction();
 
+				OracleCommand insert = connection.CreateCommand();
+
+				insert.Transaction = transaction;
+				insert.CommandText = "INSERT INTO EMP(EMPNO, ENAME, JOB) VALUES(8787, 'T Coleman', 'Monoist')";
+
+				Assert.True(insert.ExecuteNonQuery() == 1, "Error Insert EMP");
+
+				OracleCommand select = connection.CreateCommand();
+				select.CommandText = "SELECT COUNT(*) FROM EMP WHERE EMPNO = 8787";
+				select.Transaction = transaction;
+				OracleDataReader reader = select.ExecuteReader();
+
+				Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
+
+				Assert.True(reader.GetValue(0).ToString() == "1", "Row count SHOULD BE 1, VALUE IS " + reader.GetValue(0).ToString());
+
+				reader.Close();
+
+				transaction.Rollback();
+
+				select = connection.CreateCommand();
+				select.CommandText = "SELECT COUNT(*) FROM EMP WHERE EMPNO = 8787";
+
+				reader = select.ExecuteReader();
+				Assert.True(reader.Read(), "ERROR: RECORD NOT FOUND");
+				Assert.True(reader.GetValue(0).ToString() == "0", "Row count SHOULD BE 1, VALUE IS " + reader.GetValue(0).ToString());
+				reader.Close();
+			}	
+		}
+
+		[Fact]
+		private void CommitTest()
+		{
+			using(var connection = new OracleConnection(connectionString))
+            {
+				connection.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler(OnStateChange);
+				connection.Open();
+				
+				SetupEMP(connection);
+
+				OracleTransaction transaction = connection.BeginTransaction();
+
+				OracleCommand insert = connection.CreateCommand();
+				insert.Transaction = transaction;
+				insert.CommandText = "INSERT INTO EMP(EMPNO, ENAME, JOB) VALUES(8787, 'T Coleman', 'Monoist')";
+
+				insert.ExecuteNonQuery();
+
+				OracleCommand select = connection.CreateCommand();
+				select.CommandText = "SELECT COUNT(*) FROM EMP WHERE EMPNO = 8787";
+				select.Transaction = transaction;
+
+				decimal countInsert = 0;
+
+				countInsert = (decimal)select.ExecuteScalar();
+				Assert.True(countInsert == 1, string.Format("Row count SHOULD BE 1, VALUE IS {0}", countInsert));
+
+				transaction.Commit();
+
+				select = connection.CreateCommand();
+				select.CommandText = "SELECT COUNT(*) FROM EMP WHERE EMPNO = 8787";
+
+				countInsert = (decimal)select.ExecuteScalar();
+				Assert.True(countInsert == 1, string.Format("Row count SHOULD BE 1, VALUE IS {0}", countInsert));
+
+				transaction = connection.BeginTransaction();
+				OracleCommand delete = connection.CreateCommand();
+				delete.Transaction = transaction;
+				delete.CommandText = "DELETE FROM EMP WHERE EMPNO = 8787";
+				delete.ExecuteNonQuery();
+				transaction.Commit();
+			}
+		}
+
+		[Fact]
+		private void ParameterTest() 
+		{
+			using(var connection = new OracleConnection(connectionString))
+            {
+				connection.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
+				connection.StateChange += new StateChangeEventHandler(OnStateChange);
+				connection.Open();
+
+				OracleCommand cmd2 = connection.CreateCommand();
+				cmd2.CommandText = "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'";
+				cmd2.ExecuteNonQuery();
+
+				try {
+					cmd2.CommandText = "DROP TABLE MONO_TEST_TABLE7";
+					cmd2.ExecuteNonQuery();
+				}
+				catch(OracleException){
+					// ignore if table already exists
+				}
+
+				cmd2.CommandText = "CREATE TABLE MONO_TEST_TABLE7(" +
+					" COL1 VARCHAR2(8) NOT NULL, " +
+					" COL2 VARCHAR2(32), " +
+					" COL3 NUMBER(18,2) NOT NULL, " +
+					" COL4 NUMBER(18,2), " +
+					" COL5 DATE NOT NULL, " +
+					" COL6 DATE, " +
+					" COL7 BLOB NOT NULL, " +
+					" COL8 BLOB, " +
+					" COL9 CLOB NOT NULL, " +
+					" COL10 CLOB " +
+					")";
+				cmd2.ExecuteNonQuery();
+
+				cmd2.CommandText = "COMMIT";
+				cmd2.ExecuteNonQuery();
+
+				OracleTransaction trans = connection.BeginTransaction();
+				OracleCommand cmd = connection.CreateCommand();
+				cmd.Transaction = trans;
+
+				cmd.CommandText = "INSERT INTO MONO_TEST_TABLE7 " + 
+					"(COL1,COL2,COL3,COL4,COL5,COL6,COL7,COL8,COL9,COL10) " + 
+					"VALUES(:P1,:P2,:P3,:P4,:P5,:P6,:P7,:P8,:P9,:P10)";
+
+				OracleParameter parm1 = cmd.Parameters.Add(":P1", OracleType.VarChar, 8);
+				OracleParameter parm2 = cmd.Parameters.Add(":P2", OracleType.VarChar, 32);
+			
+				OracleParameter parm3 = cmd.Parameters.Add(":P3", OracleType.Number);
+				OracleParameter parm4 = cmd.Parameters.Add(":P4", OracleType.Number);
+			
+				OracleParameter parm5 = cmd.Parameters.Add(":P5", OracleType.DateTime);
+				OracleParameter parm6 = cmd.Parameters.Add(":P6", OracleType.DateTime);
+
+				OracleParameter parm7 = cmd.Parameters.Add(":P7", OracleType.Blob);
+				OracleParameter parm8 = cmd.Parameters.Add(":P8", OracleType.Blob);
+
+				OracleParameter parm9 = cmd.Parameters.Add(":P9", OracleType.Clob);
+				OracleParameter parm10 = cmd.Parameters.Add(":P10", OracleType.Clob);
+
+				// TODO: implement out, return, and ref parameters
+
+				string s = "Mono";
+				decimal d = 123456789012345.678M;
+				DateTime dt = DateTime.Now;
+
+				string clob = "Clob";
+				byte[] blob = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35 };
+			
+				parm1.Value = s;
+				parm2.Value = DBNull.Value;
+			
+				parm3.Value = d;
+				parm4.Value = DBNull.Value;
+			
+				parm5.Value = dt;
+				parm6.Value = DBNull.Value;
+			
+				parm7.Value = blob;
+				parm8.Value = DBNull.Value;
+
+				parm9.Value = clob;
+				parm10.Value = DBNull.Value;
+			
+				cmd.ExecuteNonQuery();
+				trans.Commit();
+				
+				OracleCommand select = connection.CreateCommand();
+				select.CommandText = "SELECT COL10,COL9,COL8,COL7,COL6,COL5,COL4,COL3,COL2,COL1 FROM MONO_TEST_TABLE7";
+
+				using(OracleDataReader reader = select.ExecuteReader())
+				{
+					int ordinal1 = reader.GetOrdinal("COL1");
+					int ordinal2 = reader.GetOrdinal("COL2");
+					int ordinal3 = reader.GetOrdinal("COL3");
+					int ordinal4 = reader.GetOrdinal("COL4");
+					int ordinal5 = reader.GetOrdinal("COL5");
+					int ordinal6 = reader.GetOrdinal("COL6");
+					int ordinal7 = reader.GetOrdinal("COL7");
+					int ordinal8 = reader.GetOrdinal("COL8");
+					int ordinal9 = reader.GetOrdinal("COL9");
+					int ordinal10 = reader.GetOrdinal("COL10");
+
+					while(reader.Read())
+					{
+						Assert.True(reader.GetString(ordinal1) == s, string.Format("COL1 Value: {0}", reader.GetString(ordinal1)));
+						Assert.True(reader[ordinal2] == DBNull.Value, string.Format("COL2 Value: {0}", reader[ordinal2]));
+						
+						Assert.True(reader.GetDecimal(ordinal3) == decimal.Round(d, 2), string.Format("COL3 Value: {0}", reader.GetDecimal(ordinal3)));
+						Assert.True(reader[ordinal4] == DBNull.Value, string.Format("COL4 Value: {0}", reader[ordinal4]));
+						
+						Assert.True(reader.GetDateTime(ordinal5).ToString() == dt.ToString(), string.Format("COL5 Value: {0}", reader.GetDateTime(ordinal5)));
+						Assert.True(reader[ordinal6] == DBNull.Value, string.Format("COL6 Value: {0}", reader[ordinal6]));
+						
+						Assert.True(ByteArrayCompare((byte[])reader[ordinal7], blob), string.Format("COL7 Value: {0}", reader[ordinal7]));
+						Assert.True(reader[ordinal8] == DBNull.Value, string.Format("COL8 Value: {0}", reader[ordinal8]));
+						
+						Assert.True(reader.GetString(ordinal9) == clob, string.Format("COL9 Value: {0}", reader.GetString(ordinal9)));
+						Assert.True(reader[ordinal10] == DBNull.Value, string.Format("COL10 Value: {0}", reader[ordinal10]));
+					}
+				}
+			}
+			
+		}
 
 
 /*
@@ -3170,56 +3381,7 @@ namespace dotNetCore.Data.OracleClient.test
 
 		static void Main(string[] args) 
 		{ 	
-			string connectionString = String.Format(
-				"Data Source={0};" +
-				"User ID={1};" +
-				"Password={2}",
-				"XE", "system", "oracle");
-
-			conStr = connectionString;
-
-			OracleConnection con1 = new OracleConnection();
-
-            /*
-			ShowConnectionProperties(con1);
-
-			con1.ConnectionString = connectionString;
-
-			con1.InfoMessage += new OracleInfoMessageEventHandler(OnInfoMessage);
-			con1.StateChange += new StateChangeEventHandler(OnStateChange);
-
-			Console.WriteLine("Opening...");
-			con1.Open();
-			Console.WriteLine("Opened.");
-
-			ShowConnectionProperties(con1);
-
-			InsertBlobTest(con1);
-
-			Console.WriteLine("Mono Oracle Test BEGIN ...");
-			MonoTest(con1);
-			Console.WriteLine("Mono Oracle Test END ...");
-
-			Wait("");
 			
-			Console.WriteLine("LOB Test BEGIN...");
-			CLOBTest(con1);
-			BLOBTest(con1);
-			Console.WriteLine("LOB Test END.");
-			Wait("");
-
-			Console.WriteLine("Read Simple Test BEGIN - SYSTEM.emp...");
-                        ReadSimpleTest(con1, "SELECT e.*, e.rowid FROM SYSTEM.emp e");
-			Console.WriteLine("Read Simple Test END - SYSTEM.emp");
-
-			Wait("");
-			
-			Console.WriteLine("DataAdapter Test BEGIN...");
-                        DataAdapterTest(con1);
-			Console.WriteLine("DataAdapter Test END.");
-
-			Wait("");
-
 			Console.WriteLine("DataAdapter Test 2 BEGIN...");
 			// FIXME: test is failing in NET_2_0 profile but not in NET_1_1 profile
 			// Unhandled Exception: System.Data.OracleClient.OracleException: ORA-01400: cannot insert NULL 
@@ -3229,19 +3391,6 @@ namespace dotNetCore.Data.OracleClient.test
 			Console.WriteLine("***DataAdapter Test 2 FAILS!");
 			Console.WriteLine("DataAdapter Test 2 END.");
 
-			Wait("");
-
-			Console.WriteLine("Rollback Test BEGIN...");
-                        RollbackTest(con1);
-			Console.WriteLine("Rollback Test END.");
-
-			Wait("");
-
-			Console.WriteLine("Commit Test BEGIN...");
-                        CommitTest(con1);
-			Console.WriteLine("Commit Test END.");
-
-			Wait("");
 
 			Console.WriteLine("Parameter Test BEGIN...");
                         ParameterTest(con1);

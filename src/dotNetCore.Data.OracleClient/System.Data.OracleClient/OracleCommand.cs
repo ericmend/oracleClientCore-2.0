@@ -546,11 +546,11 @@ namespace System.Data.OracleClient
 			OciStatementHandle statement = GetStatementHandle ();
 			try {
 				if (preparedStatement == null)
-					PrepareStatement (statement);
+					PrepareStatement(statement);
 
-				bool isNonQuery = IsNonQuery (statement);
+				bool isNonQuery = IsNonQuery(statement);
 
-				BindParameters (statement);
+				BindParameters(statement);
 
 				if (isNonQuery == true)
 					ExecuteNonQueryInternal (statement, false);
@@ -558,7 +558,7 @@ namespace System.Data.OracleClient
 					statement.ExecuteQuery (false);
 
 					if (statement.Fetch ()) {
-						OciDefineHandle defineHandle = (OciDefineHandle) statement.Values [0];
+						OciDefineHandle defineHandle = (OciDefineHandle) statement.Values[0];
 						if (!defineHandle.IsNull)
 						{
 							switch (defineHandle.DataType) {
