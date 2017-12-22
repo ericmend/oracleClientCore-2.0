@@ -504,7 +504,7 @@ namespace dotNetCore.Data.OracleClient.test
 
 				Assert.True(con1.DataSource.Equals(dataSource));
 
-			} catch(System.Exception e){
+			} catch(Exception e){
 				Assert.True(false, e.Message);
 			}
 			finally
