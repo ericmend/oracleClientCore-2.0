@@ -13,11 +13,14 @@ Este projeto tem como finalidade disponibilizar uma possibiliade de uso do .NET 
 * [Instalar o SDK do .NET Core](https://www.microsoft.com/net/download/core)
 * [Instalar Visual Studio Code](https://code.visualstudio.com/download)
 * [Instalar OCI - Client Oracle](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html)
-  * Descompactar os arquivos e declarar as variaveis de ambiente. ex: LD_LIBRARY_PATH="/opt/oracle/instantclient"; 
+  * (linux) Descompactar os arquivos e declarar as variaveis de ambiente. ex: LD_LIBRARY_PATH="/opt/oracle/instantclient"; 
   OCI_HOME="/opt/oracle/instantclient"; OCI_LIB_DIR="/opt/oracle/instantclient"; PATH=$PATH:"/opt/oracle/instantclient"
+  * (windows) Descompactar os arquivos e declarar as variaveis de ambiente. ex: LD_LIBRARY_PATH="C:\instantclient_12_2\"; 
+  OCI_HOME="C:\instantclient_12_2\"; OCI_LIB_DIR="C:\instantclient_12_2\"; PATH=$PATH:"C:\instantclient_12_2\"
 * Banco de Dados pode ser usado o docker: [sath89/oracle-xe-11g](https://hub.docker.com/r/sath89/oracle-xe-11g/)
+* Disponível em [Nuget](https://www.nuget.org/packages/dotNetCore.Data.OracleClient)
 
 
 ### Obs:
 
-Por enquanto o controle de compilação ainda está fixo. Arquivo `OciCalls.cs` _#define OCI_LINUX_. Caso esteja usando outro sistema operacional a mesma deverá ser subistituída para tal.
+Foi realizado um trabalho para que trabalhe em Windows/Linux/MacOsX. Testado até o momento apenas Windows (Win10) e Linux (Ubuntu 17.10).
