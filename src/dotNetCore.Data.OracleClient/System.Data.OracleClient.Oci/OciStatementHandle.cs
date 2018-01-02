@@ -17,9 +17,7 @@
 // Copyright (C) Daniel Morgan, 2005
 // 
 
-using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace System.Data.OracleClient.Oci
 {

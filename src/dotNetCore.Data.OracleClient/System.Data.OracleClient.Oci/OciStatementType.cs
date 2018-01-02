@@ -15,19 +15,20 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal enum OciStatementType {
-		Default = 0x00,
-		Select = 0x01,
-		Update = 0x02,
-		Delete = 0x03,
-		Insert = 0x04,
-		Create = 0x05,
-		Drop = 0x06,
-		Alter = 0x07,
-		Begin = 0x08,
-		Declare = 0x09
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal enum OciStatementType
+    {
+        Default = 0x00,
+        Select = 0x01,
+        Update = 0x02,
+        Delete = 0x03,
+        Insert = 0x04,
+        Create = 0x05,
+        Drop = 0x06,
+        Alter = 0x07,
+        Begin = 0x08,
+        Declare = 0x09
+    }
 }

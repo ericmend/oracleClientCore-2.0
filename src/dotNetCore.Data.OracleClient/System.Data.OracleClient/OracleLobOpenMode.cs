@@ -14,12 +14,12 @@
 // Licensed under the MIT/X11 License.
 //
 
-using System;
 
-namespace System.Data.OracleClient {
-	public enum OracleLobOpenMode
-	{
-		ReadOnly = 0x01,
-		ReadWrite = 0x02
-	}
+namespace System.Data.OracleClient
+{
+    public enum OracleLobOpenMode
+    {
+        ReadOnly = 0x01,
+        ReadWrite = 0x02
+    }
 }

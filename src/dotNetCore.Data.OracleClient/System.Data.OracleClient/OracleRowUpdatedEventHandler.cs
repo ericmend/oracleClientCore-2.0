@@ -20,8 +20,8 @@
 // Licensed under the MIT/X11 License.
 
 
-using System;
 
-namespace System.Data.OracleClient {
-	public delegate void OracleRowUpdatedEventHandler (object sender, OracleRowUpdatedEventArgs e);
+namespace System.Data.OracleClient
+{
+    public delegate void OracleRowUpdatedEventHandler(object sender, OracleRowUpdatedEventArgs e);
 }

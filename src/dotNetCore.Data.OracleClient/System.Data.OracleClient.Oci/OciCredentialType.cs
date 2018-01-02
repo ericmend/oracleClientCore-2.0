@@ -15,12 +15,13 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal enum OciCredentialType {
-		RDBMS = 0x01,
-		External = 0x02,
-		Proxy = 0x03
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal enum OciCredentialType
+    {
+        RDBMS = 0x01,
+        External = 0x02,
+        Proxy = 0x03
+    }
 }

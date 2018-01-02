@@ -1,6 +1,3 @@
-
-//#define ORACLE_DATA_ACCESS
-
 using System;
 using System.Data.OracleClient.Oci;
 using System.Runtime.InteropServices;
@@ -509,6 +506,21 @@ namespace dotNetCore.Data.OracleClient.System.Data.OracleClient.Oci.OciNativeCal
             [DllImport(OCI_DLL)]
             public static extern int OCIDateTimeCheck(IntPtr hndl,
                 IntPtr err, IntPtr date, out uint valid);
+            
+            [DllImport(OCI_DLL, EntryPoint = "OCIAttrGet")]
+            public static extern int OCIAttrGetRowIdDesc(IntPtr trgthndlp,
+                [MarshalAs(UnmanagedType.U4)] OciHandleType trghndltyp,
+                IntPtr attributep,
+                ref uint sizep,
+                [MarshalAs(UnmanagedType.U4)] OciAttributeType attrtype,
+                IntPtr errhp);
+
+            //FIXME: This method only exists in Oracle 9i client and above
+            [DllImport(OCI_DLL)]
+            public static extern int OCIRowidToChar(IntPtr rowidDesc,
+                IntPtr outbfp,
+                ref ushort outbflp,
+                IntPtr errhp);
         }
         #endregion
 
@@ -1165,6 +1177,22 @@ namespace dotNetCore.Data.OracleClient.System.Data.OracleClient.Oci.OciNativeCal
             IntPtr err, IntPtr date, out uint valid)
         {
             return NativeCalls.OCIDateTimeCheck(hndl, err, date, out valid);
+        }
+        public int OCIAttrGetRowIdDesc(IntPtr trgthndlp,
+                [MarshalAs(UnmanagedType.U4)] OciHandleType trghndltyp,
+                IntPtr attributep,
+                ref uint sizep,
+                [MarshalAs(UnmanagedType.U4)] OciAttributeType attrtype,
+                IntPtr errhp)
+        {
+            return NativeCalls.OCIAttrGetRowIdDesc(trgthndlp, trghndltyp, attributep, ref sizep, attrtype, errhp);
+        }
+        public int OCIRowidToChar(IntPtr rowidDesc,
+                IntPtr outbfp,
+                ref ushort outbflp,
+                IntPtr errhp)
+        {
+            return NativeCalls.OCIRowidToChar(rowidDesc, outbfp, ref outbflp, errhp);
         }
         #endregion
 

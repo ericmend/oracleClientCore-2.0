@@ -15,11 +15,12 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal enum OciStatementMode {
-		Default = 0x00,
-		NoSharing = 0x01
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal enum OciStatementMode
+    {
+        Default = 0x00,
+        NoSharing = 0x01
+    }
 }

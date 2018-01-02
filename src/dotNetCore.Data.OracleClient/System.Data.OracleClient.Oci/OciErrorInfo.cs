@@ -15,12 +15,12 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal struct OciErrorInfo 
-	{
-		public int ErrorCode;
-		public string ErrorMessage;
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal struct OciErrorInfo
+    {
+        public int ErrorCode;
+        public string ErrorMessage;
+    }
 }

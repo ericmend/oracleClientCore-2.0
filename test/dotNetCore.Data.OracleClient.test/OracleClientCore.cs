@@ -5,7 +5,6 @@ using System.Data.OracleClient;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading;
 using Xunit;
 
 namespace dotNetCore.Data.OracleClient.test

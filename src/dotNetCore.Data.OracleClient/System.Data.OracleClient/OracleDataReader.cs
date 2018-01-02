@@ -16,15 +16,11 @@
 // Licensed under the MIT/X11 License.
 //
 
-using System;
 using System.Collections;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data;
 using System.Data.Common;
 using System.Data.OracleClient.Oci;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Data.OracleClient

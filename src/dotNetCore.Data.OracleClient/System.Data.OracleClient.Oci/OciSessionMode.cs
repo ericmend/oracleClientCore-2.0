@@ -15,15 +15,16 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	[Flags]
-	internal enum OciSessionMode {
-		Default = 0x00,
-		Migrate = 0x01,
-		SysDBA = 0x02,
-		SysOper = 0x04,
-		PrelimAuth = 0x08
-	}
+namespace System.Data.OracleClient.Oci
+{
+    [Flags]
+    internal enum OciSessionMode
+    {
+        Default = 0x00,
+        Migrate = 0x01,
+        SysDBA = 0x02,
+        SysOper = 0x04,
+        PrelimAuth = 0x08
+    }
 }

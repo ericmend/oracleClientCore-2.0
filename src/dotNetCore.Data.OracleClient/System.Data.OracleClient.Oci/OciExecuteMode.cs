@@ -15,21 +15,22 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	[Flags]
-	internal enum OciExecuteMode {
-		Default = 0x00,
-		BatchMode = 0x01,
-		ExactFetch = 0x02,
-		KeepFetchState = 0x04,
-		ScrollableCursor = 0x08,
-		DescribeOnly = 0x10,
-		CommitOnSuccess = 0x20,
-		NonBlocking = 0x40,
-		BatchErrors = 0x80,
-		ParseOnly = 0x100,
-		ShowDmlWarnings = 0x400
-	}
+namespace System.Data.OracleClient.Oci
+{
+    [Flags]
+    internal enum OciExecuteMode
+    {
+        Default = 0x00,
+        BatchMode = 0x01,
+        ExactFetch = 0x02,
+        KeepFetchState = 0x04,
+        ScrollableCursor = 0x08,
+        DescribeOnly = 0x10,
+        CommitOnSuccess = 0x20,
+        NonBlocking = 0x40,
+        BatchErrors = 0x80,
+        ParseOnly = 0x100,
+        ShowDmlWarnings = 0x400
+    }
 }

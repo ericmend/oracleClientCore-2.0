@@ -18,7 +18,6 @@
 
 //#define ORACLE_DATA_ACCESS
 
-using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -958,6 +957,30 @@ namespace System.Data.OracleClient.Oci
             rc = OciNativeCalls.OCIDateTimeCheck(hndl, err, date, out retValid);
             valid = retValid;
             return rc;
+        }
+
+        internal static int OCIAttrGetRowIdDesc(IntPtr trgthndlp,
+                [MarshalAs(UnmanagedType.U4)] OciHandleType trghndltyp,
+                IntPtr attributep,
+                ref uint sizep,
+                [MarshalAs(UnmanagedType.U4)] OciAttributeType attrtype,
+                IntPtr errhp)
+        {
+#if TRACE
+            Trace.WriteLineIf(traceOci, "OCIAttrGetRowIdDesc", OCI_DLL);
+#endif
+            return OciNativeCalls.OCIAttrGetRowIdDesc(trgthndlp, trghndltyp, attributep, ref sizep, attrtype, errhp);
+        }
+
+        internal static int OCIRowidToChar(IntPtr rowidDesc,
+                IntPtr outbfp,
+                ref ushort outbflp,
+                IntPtr errhp)
+        {
+#if TRACE
+            Trace.WriteLineIf(traceOci, "OCIRowidToChar", OCI_DLL);
+#endif
+            return OciNativeCalls.OCIRowidToChar(rowidDesc, outbfp, ref outbflp, errhp);
         }
         #endregion
 

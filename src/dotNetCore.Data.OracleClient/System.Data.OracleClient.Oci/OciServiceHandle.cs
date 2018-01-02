@@ -19,86 +19,91 @@
 
 //#define ORACLE_DATA_ACCESS
 
-using System;
-using System.Runtime.InteropServices;
 
-namespace System.Data.OracleClient.Oci {
-	internal sealed class OciServiceHandle : OciHandle
-	{
-		#region Fields
+namespace System.Data.OracleClient.Oci
+{
+    internal sealed class OciServiceHandle : OciHandle
+    {
+        #region Fields
 
-		bool disposed = false;
-		OciSessionHandle session;
-		OciServerHandle server;
+        bool disposed = false;
+        OciSessionHandle session;
+        OciServerHandle server;
 
-		OciErrorHandle errorHandle;
+        OciErrorHandle errorHandle;
 
 #if ORACLE_DATA_ACCESS
 		static readonly uint OCI_AUTH = 8;
 #endif
 
-		#endregion // Fields
+        #endregion // Fields
 
-		#region Constructors
+        #region Constructors
 
-		public OciServiceHandle (OciHandle parent, IntPtr handle)
-			: base (OciHandleType.Service, parent, handle)
-		{
-		}
+        public OciServiceHandle(OciHandle parent, IntPtr handle)
+            : base(OciHandleType.Service, parent, handle)
+        {
+        }
 
-		#endregion // Constructors
+        #endregion // Constructors
 
-		#region Properties
+        #region Properties
 
-		public OciErrorHandle ErrorHandle {
-			get { return errorHandle; }
-			set { errorHandle = value; }
-		}
+        public OciErrorHandle ErrorHandle
+        {
+            get { return errorHandle; }
+            set { errorHandle = value; }
+        }
 
-		#endregion // Properties
+        #endregion // Properties
 
-		#region Methods
+        #region Methods
 
-		protected override void Dispose (bool disposing)
-		{
-			if (!disposed) {
-				try {
-					if (disposing) {
-						//if (server != null)
-						//	server.Dispose ();
-						//if (session != null)
-						//	session.Dispose ();
-					}
-					disposed = true;
-				} finally {
-					base.Dispose (disposing);
-				}
-			}
-		}
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        //if (server != null)
+                        //	server.Dispose ();
+                        //if (session != null)
+                        //	session.Dispose ();
+                    }
+                    disposed = true;
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
+            }
+        }
 
-		public bool SetServer (OciServerHandle handle)
-		{
-			server = handle;
-			int status = OciCalls.OCIAttrSet (this,
-							HandleType,
-							server,
-							0,
-							OciAttributeType.Server,
-							ErrorHandle);
-			return (status == 0);
-		}
+        public bool SetServer(OciServerHandle handle)
+        {
+            server = handle;
+            int status = OciCalls.OCIAttrSet(this,
+                            HandleType,
+                            server,
+                            0,
+                            OciAttributeType.Server,
+                            ErrorHandle);
+            return (status == 0);
+        }
 
-		public bool SetSession (OciSessionHandle handle)
-		{
-			session = handle;
-			int status = OciCalls.OCIAttrSet (this,
-							HandleType,
-							session,
-							0,
-							OciAttributeType.Session,
-							ErrorHandle);
-			return (status == 0);
-		}
+        public bool SetSession(OciSessionHandle handle)
+        {
+            session = handle;
+            int status = OciCalls.OCIAttrSet(this,
+                            HandleType,
+                            session,
+                            0,
+                            OciAttributeType.Session,
+                            ErrorHandle);
+            return (status == 0);
+        }
 
 #if ORACLE_DATA_ACCESS
 		byte[] UnicodeToCharSet (string s)
@@ -136,7 +141,7 @@ namespace System.Data.OracleClient.Oci {
 		}
 #endif
 
-		#endregion // Methods
-	}
+        #endregion // Methods
+    }
 }
 

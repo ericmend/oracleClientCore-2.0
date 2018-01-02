@@ -15,52 +15,56 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
-namespace System.Data.OracleClient.Oci {
-	internal sealed class OciBindHandle : OciHandle, IDisposable
-	{
-		#region Fields
+namespace System.Data.OracleClient.Oci
+{
+    internal sealed class OciBindHandle : OciHandle, IDisposable
+    {
+        #region Fields
 
-		bool disposed = false;
-		IntPtr value;
-	
-		#endregion // Fields
+        bool disposed = false;
+        IntPtr value;
 
-		#region Constructors
+        #endregion // Fields
 
-		public OciBindHandle (OciHandle parent)
-			: base (OciHandleType.Bind, parent, IntPtr.Zero)
-		{
-		}
+        #region Constructors
 
-		#endregion // Constructors
+        public OciBindHandle(OciHandle parent)
+            : base(OciHandleType.Bind, parent, IntPtr.Zero)
+        {
+        }
 
-		#region Properties
+        #endregion // Constructors
 
-		public IntPtr Value {
-			get { return value; }
-			set { this.value = value; }
-		}
+        #region Properties
 
-		#endregion // Properties
+        public IntPtr Value
+        {
+            get { return value; }
+            set { this.value = value; }
+        }
 
-		#region Methods
+        #endregion // Properties
 
-		protected override void Dispose (bool disposing)
-		{
-			if (!disposed) {
-				try {
-					Marshal.FreeHGlobal (value);
-					disposed = true;
-				} finally {
-					base.Dispose (disposing);
-				}
-			}
-		}
+        #region Methods
 
-		#endregion // Methods
-	}
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                try
+                {
+                    Marshal.FreeHGlobal(value);
+                    disposed = true;
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
+            }
+        }
+
+        #endregion // Methods
+    }
 }

@@ -14,10 +14,8 @@
 // Licensed under the MIT/X11 License.
 //
 
-using System;
-using System.IO;
-using System.Data.SqlTypes;
 
-namespace System.Data.OracleClient {
-	public delegate void OracleInfoMessageEventHandler (object sender, OracleInfoMessageEventArgs e);
+namespace System.Data.OracleClient
+{
+    public delegate void OracleInfoMessageEventHandler(object sender, OracleInfoMessageEventArgs e);
 }

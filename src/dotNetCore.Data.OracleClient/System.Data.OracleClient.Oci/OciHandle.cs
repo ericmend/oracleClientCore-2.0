@@ -17,11 +17,7 @@
 // Copyright (C) Daniel Morgan, 2005
 // 
 
-using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography;
-using System.Globalization;
 
 namespace System.Data.OracleClient.Oci
 {
@@ -260,13 +256,6 @@ namespace System.Data.OracleClient.Oci
             return output;
         }
 
-        [DllImport("oci", EntryPoint = "OCIAttrGet")]
-        internal static extern int OCIAttrGetRowIdDesc(IntPtr trgthndlp,
-            [MarshalAs(UnmanagedType.U4)] OciHandleType trghndltyp,
-            IntPtr attributep,
-            ref uint sizep,
-            [MarshalAs(UnmanagedType.U4)] OciAttributeType attrtype,
-            IntPtr errhp);
         internal OciRowIdDescriptor GetAttributeRowIdDescriptor(OciErrorHandle errorHandle, OciHandle env)
         {
             OciRowIdDescriptor descriptor = null;
@@ -278,7 +267,7 @@ namespace System.Data.OracleClient.Oci
             outputPtr = OciCalls.AllocateClear(outSize);
 
             uint siz = (uint)outSize;
-            status = OCIAttrGetRowIdDesc(Handle,
+            status = OciCalls.OCIAttrGetRowIdDesc(Handle,
                 HandleType,
                 outputPtr,
                 ref siz,

@@ -15,12 +15,13 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal enum OciPointerType {
-		Name = 0x01,
-		Ref = 0x02,
-		Ptr = 0x03
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal enum OciPointerType
+    {
+        Name = 0x01,
+        Ref = 0x02,
+        Ptr = 0x03
+    }
 }

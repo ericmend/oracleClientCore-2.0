@@ -15,241 +15,254 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
-using System.Data.OracleClient;
-using System.Runtime.InteropServices;
 
-namespace System.Data.OracleClient.Oci {
-	internal sealed class OciLobLocator : OciDescriptorHandle, IDisposable
-	{
-		#region Fields
+namespace System.Data.OracleClient.Oci
+{
+    internal sealed class OciLobLocator : OciDescriptorHandle, IDisposable
+    {
+        #region Fields
 
-		bool disposed = false;
-		OciErrorHandle errorHandle;
-		OciServiceHandle service;
-		OciEnvironmentHandle environment;
-		OciDataType type;
+        bool disposed = false;
+        OciErrorHandle errorHandle;
+        OciServiceHandle service;
+        OciEnvironmentHandle environment;
+        OciDataType type;
 
-		#endregion // Fields
+        #endregion // Fields
 
-		#region Constructors
+        #region Constructors
 
-		public OciLobLocator (OciHandle parent, IntPtr handle)
-			: base (OciHandleType.LobLocator, parent, handle)
-		{
-		}
+        public OciLobLocator(OciHandle parent, IntPtr handle)
+            : base(OciHandleType.LobLocator, parent, handle)
+        {
+        }
 
-		#endregion // Constructors
+        #endregion // Constructors
 
-		#region Properties 
+        #region Properties 
 
-		public OciErrorHandle ErrorHandle {
-			get { return errorHandle; }
-			set { errorHandle = value; }
-		}
+        public OciErrorHandle ErrorHandle
+        {
+            get { return errorHandle; }
+            set { errorHandle = value; }
+        }
 
-		public OciServiceHandle Service {
-			get { return service; }
-			set { service = value; }
-		}
+        public OciServiceHandle Service
+        {
+            get { return service; }
+            set { service = value; }
+        }
 
-		public OciDataType LobType {	
-			get { return type; }
-			set { type = value; }
-		}
-		
-		public OciEnvironmentHandle Environment {
-			get { return environment; }
-			set { environment = value; }
-		}
-		
-		#endregion // Properties
+        public OciDataType LobType
+        {
+            get { return type; }
+            set { type = value; }
+        }
 
-		#region Methods
+        public OciEnvironmentHandle Environment
+        {
+            get { return environment; }
+            set { environment = value; }
+        }
 
-		public void BeginBatch (OracleLobOpenMode mode)
-		{
-			int status = 0;
-			status = OciCalls.OCILobOpen (Service, 
-						ErrorHandle,
-						Handle,
-						(byte) mode);
+        #endregion // Properties
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
-		}
+        #region Methods
 
-		public uint Copy (OciLobLocator destination, uint amount, uint destinationOffset, uint sourceOffset)
-		{
-			OciCalls.OCILobCopy (Service,
-					ErrorHandle,
-					destination,
-					Handle,
-					amount,
-					destinationOffset,
-					sourceOffset);
-			return amount;
-		}
+        public void BeginBatch(OracleLobOpenMode mode)
+        {
+            int status = 0;
+            status = OciCalls.OCILobOpen(Service,
+                        ErrorHandle,
+                        Handle,
+                        (byte)mode);
 
-		protected override void Dispose (bool disposing)
-		{
-			if (!disposed) {
-				disposed = true;
-				base.Dispose ();
-			}
-		}
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
+        }
 
-		public void EndBatch ()
-		{
-			int status = 0;
-			status = OciCalls.OCILobClose (Service, ErrorHandle, this);
+        public uint Copy(OciLobLocator destination, uint amount, uint destinationOffset, uint sourceOffset)
+        {
+            OciCalls.OCILobCopy(Service,
+                    ErrorHandle,
+                    destination,
+                    Handle,
+                    amount,
+                    destinationOffset,
+                    sourceOffset);
+            return amount;
+        }
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
-		}
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                disposed = true;
+                base.Dispose();
+            }
+        }
 
-		public uint Erase (uint offset, uint amount)
-		{
-			int status = 0;
-			uint output = amount;
-			status = OciCalls.OCILobErase (Service,
-						ErrorHandle,
-						this,
-						ref output,
-						(uint) offset);
+        public void EndBatch()
+        {
+            int status = 0;
+            status = OciCalls.OCILobClose(Service, ErrorHandle, this);
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
+        }
 
-			return output;
-		}
+        public uint Erase(uint offset, uint amount)
+        {
+            int status = 0;
+            uint output = amount;
+            status = OciCalls.OCILobErase(Service,
+                        ErrorHandle,
+                        this,
+                        ref output,
+                        (uint)offset);
 
-		public int GetChunkSize ()
-		{
-			int status = 0;
-			uint output;
-			status = OciCalls.OCILobGetChunkSize (Service,
-							ErrorHandle,
-							this,
-							out output);
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
+            return output;
+        }
 
-			return (int) output;
-		}
+        public int GetChunkSize()
+        {
+            int status = 0;
+            uint output;
+            status = OciCalls.OCILobGetChunkSize(Service,
+                            ErrorHandle,
+                            this,
+                            out output);
 
-		public long GetLength (bool binary)
-		{
-			int status = 0;
-			uint output;
-			status = OciCalls.OCILobGetLength (Service, 
-						ErrorHandle,
-						this,
-						out output);
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
 
-			if (!binary)
-				output *= 2;
+            return (int)output;
+        }
 
-			return (long) output;
-		}
+        public long GetLength(bool binary)
+        {
+            int status = 0;
+            uint output;
+            status = OciCalls.OCILobGetLength(Service,
+                        ErrorHandle,
+                        this,
+                        out output);
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
 
-		public int Read (byte[] buffer, uint offset, uint count, bool binary)
-		{
-			int status = 0;
-			uint amount = count;
-			byte csfrm = 0; 
+            if (!binary)
+                output *= 2;
 
-			// Character types are UTF-16, so amount of characters is 1/2
-			// the amount of bytes
-			if (!binary) {
-				amount /= 2;
-				status = OciCalls.OCILobCharSetForm (environment, 
-				             ErrorHandle, 
-				             this, 
-				             out csfrm);
-				if (status != 0) {
-					OciErrorInfo info = ErrorHandle.HandleError ();
-					throw new OracleException (info.ErrorCode, info.ErrorMessage);
-				}
-			}
-			
-			status = OciCalls.OCILobRead (Service,
-						ErrorHandle,
-						this,
-						ref amount,
-						offset,
-						buffer,
-						count,
-						IntPtr.Zero,
-						IntPtr.Zero,
-						1000,  // OCI_UCS2ID
-						csfrm);
+            return (long)output;
+        }
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
+        public int Read(byte[] buffer, uint offset, uint count, bool binary)
+        {
+            int status = 0;
+            uint amount = count;
+            byte csfrm = 0;
 
-			return (int) amount;
-		}
+            // Character types are UTF-16, so amount of characters is 1/2
+            // the amount of bytes
+            if (!binary)
+            {
+                amount /= 2;
+                status = OciCalls.OCILobCharSetForm(environment,
+                             ErrorHandle,
+                             this,
+                             out csfrm);
+                if (status != 0)
+                {
+                    OciErrorInfo info = ErrorHandle.HandleError();
+                    throw new OracleException(info.ErrorCode, info.ErrorMessage);
+                }
+            }
 
-		public void Trim (uint newlen)
-		{
-			int status = 0;
-			status = OciCalls.OCILobTrim (Service,
-						ErrorHandle,
-						this,
-						newlen);
+            status = OciCalls.OCILobRead(Service,
+                        ErrorHandle,
+                        this,
+                        ref amount,
+                        offset,
+                        buffer,
+                        count,
+                        IntPtr.Zero,
+                        IntPtr.Zero,
+                        1000,  // OCI_UCS2ID
+                        csfrm);
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
 
-		}
+            return (int)amount;
+        }
 
-		public int Write (byte[] buffer, uint offset, uint count, OracleType type)
-		{
-			int status = 0;
-			uint amount = count;
+        public void Trim(uint newlen)
+        {
+            int status = 0;
+            status = OciCalls.OCILobTrim(Service,
+                        ErrorHandle,
+                        this,
+                        newlen);
 
-			if (type == OracleType.Clob)
-				amount /= 2;
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
 
-			status = OciCalls.OCILobWrite (Service,
-						ErrorHandle,
-						this,
-						ref amount,
-						offset,
-						buffer,
-						count,
-						0,    // OCI_ONE_PIECE
-						IntPtr.Zero,
-						IntPtr.Zero,
-						1000, // OCI_UCS2ID
-						0);
+        }
 
-			if (status != 0) {
-				OciErrorInfo info = ErrorHandle.HandleError ();
-				throw new OracleException (info.ErrorCode, info.ErrorMessage);
-			}
+        public int Write(byte[] buffer, uint offset, uint count, OracleType type)
+        {
+            int status = 0;
+            uint amount = count;
 
-			return (int) amount;
-		}
+            if (type == OracleType.Clob)
+                amount /= 2;
 
-		#endregion // Methods
-	}
+            status = OciCalls.OCILobWrite(Service,
+                        ErrorHandle,
+                        this,
+                        ref amount,
+                        offset,
+                        buffer,
+                        count,
+                        0,    // OCI_ONE_PIECE
+                        IntPtr.Zero,
+                        IntPtr.Zero,
+                        1000, // OCI_UCS2ID
+                        0);
+
+            if (status != 0)
+            {
+                OciErrorInfo info = ErrorHandle.HandleError();
+                throw new OracleException(info.ErrorCode, info.ErrorMessage);
+            }
+
+            return (int)amount;
+        }
+
+        #endregion // Methods
+    }
 }

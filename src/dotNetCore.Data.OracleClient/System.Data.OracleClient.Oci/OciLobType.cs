@@ -15,11 +15,12 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal enum OciLobType {
-		Blob = 0x01,
-		Clob = 0x02
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal enum OciLobType
+    {
+        Blob = 0x01,
+        Clob = 0x02
+    }
 }

@@ -15,12 +15,13 @@
 // Copyright (C) Tim Coleman, 2003
 // 
 
-using System;
 
-namespace System.Data.OracleClient.Oci {
-	internal enum OciStatementLanguage {
-		NTV = 0x01,
-		V7 = 0x02,
-		V8 = 0x03
-	}
+namespace System.Data.OracleClient.Oci
+{
+    internal enum OciStatementLanguage
+    {
+        NTV = 0x01,
+        V7 = 0x02,
+        V8 = 0x03
+    }
 }

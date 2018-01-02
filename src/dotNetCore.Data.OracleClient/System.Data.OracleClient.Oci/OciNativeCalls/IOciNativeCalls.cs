@@ -487,6 +487,18 @@ namespace dotNetCore.Data.OracleClient.System.Data.OracleClient.Oci.OciNativeCal
         int OCIDateTimeCheck(IntPtr hndl,
             IntPtr err, IntPtr date, out uint valid);
 
+        int OCIAttrGetRowIdDesc(IntPtr trgthndlp,
+                [MarshalAs(UnmanagedType.U4)] OciHandleType trghndltyp,
+                IntPtr attributep,
+                ref uint sizep,
+                [MarshalAs(UnmanagedType.U4)] OciAttributeType attrtype,
+                IntPtr errhp);
+
+        int OCIRowidToChar(IntPtr rowidDesc,
+                IntPtr outbfp,
+                ref ushort outbflp,
+                IntPtr errhp);
+
         IntPtr AllocateClear(int cb);
     }
 }

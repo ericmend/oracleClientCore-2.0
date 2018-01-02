@@ -16,31 +16,32 @@
 // Licensed under the MIT/X11 License.
 //
 
-using System;
 using System.Runtime.Serialization;
 
-namespace System.Data.OracleClient {
-	[Serializable]
-	public sealed class OracleException : System.Data.Common.DbException
-	{
-		int code;
+namespace System.Data.OracleClient
+{
+    [Serializable]
+    public sealed class OracleException : System.Data.Common.DbException
+    {
+        int code;
 
-		internal OracleException (int code, string message) : base (message)
-		{
-			this.code = code;
-		}
+        internal OracleException(int code, string message) : base(message)
+        {
+            this.code = code;
+        }
 
-		private OracleException (SerializationInfo si, StreamingContext sc) : base(si, sc)
-		{
-			code = si.GetInt32 ("code");
-		}
-		public int Code {
-			get { return code; }
-		}
-		public override void GetObjectData (SerializationInfo si, StreamingContext context)
-		{
-			si.AddValue ("code", code, typeof(int));
-			base.GetObjectData (si, context);
-		}
-	}
+        private OracleException(SerializationInfo si, StreamingContext sc) : base(si, sc)
+        {
+            code = si.GetInt32("code");
+        }
+        public int Code
+        {
+            get { return code; }
+        }
+        public override void GetObjectData(SerializationInfo si, StreamingContext context)
+        {
+            si.AddValue("code", code, typeof(int));
+            base.GetObjectData(si, context);
+        }
+    }
 }
