@@ -27,3 +27,10 @@ Este projeto tem como finalidade disponibilizar uma possibiliade de uso do .NET 
 ### Obs:
 
 Foi realizado um trabalho para que trabalhe em Windows/Linux/MacOsX. Testado até o momento apenas Windows (Win10) e Linux (Ubuntu 17.10).
+
+
+Veja também:
+
+[Docker para ASP.NET Core com Oracle Client](https://hub.docker.com/r/ericmend/aspnetcore-oracleclient/)
+
+[ORM Dapper](https://github.com/StackExchange/Dapper)
