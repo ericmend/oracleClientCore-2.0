@@ -3,6 +3,9 @@ Unofficial Oracle Client for .Net Core
 
 Based on projects: [Mono](https://github.com/mono/mono) and [Oracleclientcore](https://github.com/LinqDan/oracleclientcore) from LinqDan
 
+License
+These files are licensed under the [MIT License](https://github.com/ericmend/oracleClientCore-2.0/blob/master/LICENSE)
+
 # Sobre:
 Este projeto tem como finalidade disponibilizar uma possibiliade de uso do .NET Core usando banco de dado Oracle _(até que a Oracle consiga certificar o ODP.NET, Managed Driver no Microsoft .NET Core)_
 [odpnet-dotnet-core](http://www.oracle.com/technetwork/topics/dotnet/tech-info/odpnet-dotnet-core-sod-3628981.pdf)
