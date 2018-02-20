@@ -40,11 +40,11 @@ namespace System.Data.OracleClient.Oci
                     {
                         if (mOciNativeCalls == default(IOciNativeCalls))
                         {
-                            if ((int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 128)
+                            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)) 
                             {
                                 mOciNativeCalls = new OciNativeCallsLinux();
                             }
-                            else if ((int)Environment.OSVersion.Platform == 6)
+                            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX)) 
                             {
                                 mOciNativeCalls = new OciNativeCallsMacOSX();
                             }
