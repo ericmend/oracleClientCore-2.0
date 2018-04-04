@@ -1,6 +1,6 @@
 # News
-Oracle Data Provider for .NET Core Official betta:
-http://www.oracle.com/technetwork/topics/dotnet/downloads/odpnetcorebeta-4077982.html
+Nuget Oracle Data Provider for .NET Core Official:
+https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core
 
 # oracleClientCore-2.0
 Unofficial Oracle Client for NetCore
