@@ -533,6 +533,61 @@ namespace System.Data.OracleClient.Oci
             return new OracleLob(lobLocator, ociType);
         }
 
+        internal object GetValueByteArray(OracleConnection conn)
+        {
+
+            byte[] buffer = null;
+
+            switch (DataType)
+            {
+                case OciDataType.VarChar2:
+                case OciDataType.String:
+                case OciDataType.VarChar:
+                case OciDataType.Char:
+                case OciDataType.CharZ:
+                case OciDataType.OciString:
+                case OciDataType.RowIdDescriptor:
+                case OciDataType.Integer:
+                case OciDataType.Number:
+                case OciDataType.Float:
+                case OciDataType.VarNum:
+                case OciDataType.UnsignedInt:
+                case OciDataType.Date:
+                case OciDataType.Raw:
+                case OciDataType.VarRaw:
+                case OciDataType.TimeStamp:
+                case OciDataType.IntervalDayToSecond:
+                case OciDataType.IntervalYearToMonth:
+                    buffer = new byte[Size];
+                    Marshal.Copy(Value, buffer, 0, Size);
+                    return buffer;
+                case OciDataType.LongVarChar:
+                case OciDataType.Long:
+                    buffer = new byte[LongVarCharMaxValue];
+                    Marshal.Copy(Value, buffer, 0, buffer.Length);
+                    return buffer;
+                case OciDataType.LongRaw:
+                case OciDataType.LongVarRaw:
+                    buffer = new byte[LongVarRawMaxValue];
+                    Marshal.Copy(Value, buffer, 0, buffer.Length);
+
+                    int longrawSize = 0;
+                    if (BitConverter.IsLittleEndian)
+                        longrawSize = BitConverter.ToInt32(new byte[] { buffer[0], buffer[1], buffer[2], buffer[3] }, 0);
+                    else
+                        longrawSize = BitConverter.ToInt32(new byte[] { buffer[3], buffer[2], buffer[1], buffer[0] }, 0);
+
+                    byte[] longraw_buffer = new byte[longrawSize];
+                    Array.ConstrainedCopy(buffer, 4, longraw_buffer, 0, longrawSize);
+                    return longraw_buffer;
+                case OciDataType.Blob:
+                case OciDataType.Clob:
+                    return GetOracleLob();
+                default:
+                    throw new Exception("OciDataType not implemented: " + DataType.ToString());
+            }
+        }
+
         internal object GetValue(IFormatProvider formatProvider, OracleConnection conn)
         {
             object tmp;
