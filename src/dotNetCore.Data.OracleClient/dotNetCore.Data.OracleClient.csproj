@@ -4,12 +4,16 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>dotNetCore.Data.OracleClient</PackageId>
     <Product>oracleClientCore-2.0</Product>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.0.1</PackageVersion>
     <Authors>Eric Mendonca</Authors>
     <PackageProjectUrl>https://github.com/ericmend/oracleClientCore-2.0</PackageProjectUrl>
     <Description>Unofficial Oracle Client for .Net Core</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
+      1.0.1
+      - Better handling of binary data in varchar fields.
+      - Method to (mostly) build a self contained NuGet package.
+
       1.0.0
       - Providing the unofficial oracle client as nuget
       </PackageReleaseNotes>

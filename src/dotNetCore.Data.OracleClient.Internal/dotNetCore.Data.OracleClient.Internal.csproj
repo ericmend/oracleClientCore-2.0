@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>dotNetCore.Data.OracleClient11.Internal</PackageId>
+    <Product>oracleClientCore-2.0</Product>
+    <PackageVersion>1.0.1</PackageVersion>
+    <Authors>Eric Mendonca</Authors>
+    <PackageProjectUrl>https://github.com/ericmend/oracleClientCore-2.0</PackageProjectUrl>
+    <Description>
+      Unofficial Oracle Client for .Net Core.
+      
+      For company internal use only since the NuGet package contains the shared object libraries from Oracle.
+    </Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>
+      1.0.1
+      - Pack native DLLs for internal NuGet
+
+      1.0.0
+      - Providing the unofficial oracle client as nuget
+      </PackageReleaseNotes>
+    <Copyright>Copyright 2017</Copyright>
+    <PackageTags>Client Oracle Core oracleClientCore</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../dotNetCore.Data.OracleClient/System.Data.OracleClient/*.cs" />
+    <Compile Include="../dotNetCore.Data.OracleClient/System.Data.OracleClient.Oci/*.cs" />
+    <Compile Include="../dotNetCore.Data.OracleClient/System.Data.OracleClient.Oci/OciNativeCalls/*.cs" />
+  </ItemGroup>
+
+  <Target Name="SharedLibTarget" AfterTargets="Build">
+    <Copy SourceFiles="@(MyPackageFiles)" DestinationFolder="$(OutputPath)" ContinueOnError="false" />
+  </Target>
+
+<!-- Just incude everything found, no errors for missing files.
+  <ItemGroup>
+    <None Include="./lib-win-x64/*.dll" Pack="true" PackagePath="runtimes/win-x64/native" />
+    <None Include="./lib-linux-x64/*.so*" Pack="true" PackagePath="runtimes/linux-x64/native" />
+  </ItemGroup>
+-->
+
+<!-- Alternative way, will also raise an error if a needed file is missing -->
+  <ItemGroup>
+    <Content CopyToOutputDirectory="PreserveNewest" Include="lib-win-x64/oci.dll" Link="oci.dll" Pack="true" PackagePath="runtimes/win-x64/native/oci.dll" />
+    <Content CopyToOutputDirectory="PreserveNewest" Include="lib-win-x64/orannzsbb11.dll" Link="orannzsbb11.dll" Pack="true" PackagePath="runtimes/win-x64/native/orannzsbb11.dll" />
+    <Content CopyToOutputDirectory="PreserveNewest" Include="lib-win-x64/oraocci11.dll" Link="oraocci11.dll" Pack="true" PackagePath="runtimes/win-x64/native/oraocci11.dll" />
+    <Content CopyToOutputDirectory="PreserveNewest" Include="lib-win-x64/oraociei11.dll" Link="oraociei11.dll" Pack="true" PackagePath="runtimes/win-x64/native/oraociei11.dll" />
+
+    <Content CopyToOutputDirectory="PreserveNewest" Include="lib-linux-x64/libclntsh.so" Link="libclntsh.so" Pack="true" PackagePath="runtimes/linux-x64/native/libclntsh.so" />
+    <Content CopyToOutputDirectory="PreserveNewest" Include="lib-linux-x64/libnnz11.so" Link="libnnz11.so" Pack="true" PackagePath="runtimes/linux-x64/native/libnnz11.so" />
+  </ItemGroup>
+
+</Project>
