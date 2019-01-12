@@ -193,7 +193,7 @@ namespace System.Data.OracleClient
         override
         long GetBytes(int i, long fieldOffset, byte[] buffer2, int bufferoffset, int length)
         {
-            byte[] value = (byte[])GetValue(i);
+            byte[] value = (byte[])GetValueByteArray(i);
 
             if (buffer2 == null)
                 return value.Length; // Return length of data
@@ -320,7 +320,7 @@ namespace System.Data.OracleClient
             if (IsDBNull(i))
                 throw new InvalidOperationException("The value is null");
 
-            return new OracleBinary((byte[])GetValue(i));
+            return new OracleBinary((byte[])GetValueByteArray(i));
         }
 
         public OracleLob GetOracleLob(int i)
@@ -757,6 +757,27 @@ namespace System.Data.OracleClient
                     return value;
                 default:
                     return defineHandle.GetValue(command.Connection.SessionFormatProvider, command.Connection);
+            }
+        }
+
+        public
+        object GetValueByteArray(int i)
+        {
+            OciDefineHandle defineHandle = (OciDefineHandle)statement.Values[i];
+
+            if (defineHandle.IsNull)
+                return DBNull.Value;
+
+            switch (defineHandle.DataType)
+            {
+                case OciDataType.Blob:
+                case OciDataType.Clob:
+                    OracleLob lob = GetOracleLob(i);
+                    object value = lob.Value;
+                    lob.Close();
+                    return value;
+                default:
+                    return defineHandle.GetValueByteArray(command.Connection);
             }
         }
 

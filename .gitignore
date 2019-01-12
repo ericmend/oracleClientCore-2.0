@@ -77,3 +77,7 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
+# Copied in libraries
+src/dotNetCore.Data.OracleClient.Internal/lib-win-x64
+src/dotNetCore.Data.OracleClient.Internal/lib-linux-x64
